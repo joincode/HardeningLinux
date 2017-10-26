@@ -21,11 +21,12 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 echo "Iniciando Script de Auditoria "
+mkdir -p /root/Auditoria/
 ###############################################################################
 #Controle de variáveis de ambiente
 HOST=`hostname`
 DATA=`date +"%d%m%Y-%H%M"`
-LOG='Auditoria-'$HOST'-'$DATA'.csv'
+LOG='/root/Auditoria/Auditoria-'$HOST'-'$DATA'.csv'
 #criar aquivo de Log para análise de ambiente
 touch $LOG
 ################################################################################

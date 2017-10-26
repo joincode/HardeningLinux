@@ -21,49 +21,98 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 echo "Iniciando Script de Conformidade "
+mkdir -p /root/Auditoria/
 ###############################################################################
 #Controle de variaveis de ambiente
 HOST=`hostname`
 DATA=`date +"%d%m%Y-%H%M"`
-LOG='Auditoria-'$HOST'-'$DATA'.csv'
+LOG='/root/Auditoria/Auditoria-'$HOST'-'$DATA'.csv'
 #criar aquivo de Log para análise de ambiente
 touch $LOG
+MP=`echo "manual procedure"`
 ################################################################################
 echo "Iniciando Script de Compliance" >> $LOG
 clear
-echo "Initial Setup"
-echo "1.1	Filesystem Configuration"
-echo "1.1.1	Disable unused filesystems"
-    echo "1.1.1.1	Ensure mounting of cramfs filesystems is disabled (Scored)"
-    echo "1.1.1.2	Ensure mounting of freevxfs filesystems is disabled (Scored)"
-    echo "1.1.1.3	Ensure mounting of jffs2 filesystems is disabled (Scored)"
-    echo "1.1.1.4	Ensure mounting of hfs filesystems is disabled (Scored)"
-    echo "1.1.1.5	Ensure mounting of hfsplus filesystems is disabled (Scored)"
-    echo "1.1.1.6	Ensure mounting of squashfs filesystems is disabled (Scored)"
-    echo "1.1.1.7	Ensure mounting of udf filesystems is disabled (Scored)"
-    echo "1.1.1.8	Ensure mounting of FAT filesystems is disabled (Scored)"
-#1.1.2	Ensure separate partition exists for /tmp (Scored)
-#1.1.3	Ensure nodev option set on /tmp partition (Scored)
-#1.1.4	Ensure nosuid option set on /tmp partition (Scored)
-#1.1.5	Ensure noexec option set on /tmp partition (Scored)
-#1.1.6	Ensure separate partition exists for /var (Scored)
-#1.1.7	Ensure separate partition exists for /var/tmp (Scored)
-#1.1.8	Ensure nodev option set on /var/tmp partition (Scored)
-#1.1.9	Ensure nosuid option set on /var/tmp partition (Scored)
-#1.1.10	Ensure noexec option set on /var/tmp partition (Scored)
-#1.1.11	Ensure separate partition exists for /var/log (Scored)
-#1.1.12	Ensure separate partition exists for /var/log/audit (Scored)
-#1.1.13	Ensure separate partition exists for /home (Scored)
-#1.1.14	Ensure nodev option set on /home partition (Scored)
-#1.1.15	Ensure nodev option set on /dev/shm partition (Scored)
-#1.1.16	Ensure nosuid option set on /dev/shm partition (Scored)
-#1.1.17	Ensure noexec option set on /dev/shm partition (Scored)
-#1.1.18	Ensure nodev option set on removable media partitions (Not Scored)
-#1.1.19	Ensure nosuid option set on removable media partitions (Not Scored)
-#1.1.20	Ensure noexec option set on removable media partitions (Not Scored)
-#1.1.21	Ensure sticky bit is set on all world-writable directories (Scored)
-#1.1.22	Disable Automounting (Scored)
-#1.2	Configure Software Updates
+    echo "Initial Setup" >> $LOG
+    echo "1.1	Filesystem Configuration">> $LOG
+        echo "1.1.1	Disable unused filesystems">> $LOG
+            CONTROL="1.1.1.1 Ensure mounting of cramfs filesystems is disabled"
+                echo  "$CONTROL,pass,Scored">> $LOG
+            CONTROL="1.1.1.2 Ensure mounting of freevxfs filesystems is disabled"
+                 echo "$CONTROL,pass,Scored">> $LOG
+            CONTROL="1.1.1.3 Ensure mounting of jffs2 filesystems is disabled"
+                 echo "$CONTROL,pass,Scored">> $LOG
+            CONTROL="1.1.1.4 Ensure mounting of hfs filesystems is disabled"
+                 echo "$CONTROL,pass,Scored">> $LOG
+            CONTROL="1.1.1.5 Ensure mounting of hfsplus filesystems is disabled"
+                 echo "$CONTROL,pass,Scored">> $LOG
+            CONTROL="1.1.1.6 Ensure mounting of squashfs filesystems is disabled"
+                 echo "$CONTROL,pass,Scored">> $LOG
+            CONTROL="1.1.1.7 Ensure mounting of udf filesystems is disabled"
+                 echo "$CONTROL,pass,Scored">> $LOG
+            CONTROL="1.1.1.8 Ensure mounting of FAT filesystems is disabled"
+                 echo "$CONTROL,pass,Scored">> $LOG
+echo "/etc/modprobe.d/CIS.conf"
+if [ "$?" == "0" ]; then
+  rm -f /etc/modprobe.d/CIS.conf
+  else
+  touch /etc/modprobe.d/CIS.conf
+fi
+
+CISCONF="/etc/modprobe.d/CIS.conf"
+        echo "install cramfs /bin/true"     >>$CISCONF
+        echo "install freevxfs /bin/true"   >>$CISCONF
+        echo "install jffs2 /bin/true"      >>$CISCONF
+        echo "install hfs /bin/true"        >>$CISCONF
+        echo "install hfsplus /bin/true"    >>$CISCONF
+        echo "install squashfs /bin/true"   >>$CISCONF
+        echo "install udf /bin/true"        >>$CISCONF
+        echo "install vfat /bin/true"       >>$CISCONF
+
+        CONTROL="1.1.2	Ensure separate partition exists for /tmp"
+            echo "$CONTROL,$MP,Scored">> $LOG
+        CONTROL="1.1.3	Ensure nodev option set on /tmp partition"
+            echo "$CONTROL,$MP,Scored">> $LOG
+        CONTROL="1.1.4	Ensure nosuid option set on /tmp partition" 
+            echo "$CONTROL,$MP,Scored">> $LOG
+        CONTROL="1.1.5	Ensure noexec option set on /tmp partition"
+            echo "$CONTROL,$MP,Scored">> $LOG
+        CONTROL="1.1.6	Ensure separate partition exists for /var"
+            echo "$CONTROL,$MP,Scored">> $LOG
+        CONTROL="1.1.7	Ensure separate partition exists for /var/tmp"
+            echo "$CONTROL,$MP,Scored">> $LOG
+        CONTROL="1.1.8	Ensure nodev option set on /var/tmp partition"
+            echo "$CONTROL,$MP,Scored">> $LOG
+        CONTROL="1.1.9	Ensure nosuid option set on /var/tmp partition"
+            echo "$CONTROL,$MP,Scored">> $LOG
+        CONTROL="1.1.10	Ensure noexec option set on /var/tmp partition"
+            echo "$CONTROL,$MP,Scored">> $LOG
+        CONTROL="1.1.11	Ensure separate partition exists for /var/log"
+            echo "$CONTROL,$MP,Scored">> $LOG
+        CONTROL="1.1.12	Ensure separate partition exists for /var/log/audit"
+            echo "$CONTROL,$MP,Scored">> $LOG
+        CONTROL="1.1.13	Ensure separate partition exists for /home"
+            echo "$CONTROL,$MP,Scored">> $LOG
+        CONTROL="1.1.14	Ensure nodev option set on /home partition"
+            echo "$CONTROL,$MP,Scored">> $LOG
+        CONTROL="1.1.15	Ensure nodev option set on /dev/shm partition"
+            echo "$CONTROL,$MP,Scored">> $LOG
+        CONTROL="1.1.16	Ensure nosuid option set on /dev/shm partition"
+            echo "$CONTROL,$MP,Scored">> $LOG
+        CONTROL="1.1.17	Ensure noexec option set on /dev/shm partition"
+            echo "$CONTROL,$MP,Scored">> $LOG
+        CONTROL="1.1.18	Ensure nodev option set on removable media partitions"
+            echo "$CONTROL,$MP,Not Scored">> $LOG
+        CONTROL="1.1.19	Ensure nosuid option set on removable media partitions"
+            echo "$CONTROL,$MP,Not Scored">> $LOG
+        CONTROL="1.1.20	Ensure noexec option set on removable media partitions"
+            echo "$CONTROL,$MP,Not Scored">> $LOG
+        CONTROL="1.1.21	Ensure sticky bit is set on all world-writable directories"
+            echo "$CONTROL,$MP,Not Scored">> $LOG
+        CONTROL="1.1.22	Disable Automounting"
+            echo "$CONTROL,$MP,Scored">> $LOG
+
+    echo "1.2	Configure Software Updates"
 #1.2.1	Ensure package manager repositories are configured (Not Scored)
 #1.2.2	Ensure gpgcheck is globally activated (Scored)
 #1.2.3	Ensure GPG keys are configured (Not Scored)
@@ -100,7 +149,7 @@ echo "1.1.1	Disable unused filesystems"
 #1.7.1.6	Ensure permissions on /etc/issue.net are configured (Not Scored)
 #1.7.2	Ensure GDM login banner is configured (Scored)
 #1.8	Ensure updates, patches, and additional security software are installed (Not Scored)
-#2	Services
+echo "2	Services"
 #2.1	inetd Services
 #2.1.1	Ensure chargen services are not enabled (Scored)
 #2.1.2	Ensure daytime services are not enabled (Scored)
@@ -175,8 +224,8 @@ echo "1.1.1	Disable unused filesystems"
 #3.6.4	Ensure outbound and established connections are configured (Not Scored)
 #3.6.5	Ensure firewall rules exist for all open ports (Scored)
 #3.7	Ensure wireless interfaces are disabled (Not Scored)
-#4	Logging and Auditing
-#4.1	Configure System Accounting (auditd)
+echo "4	Logging and Auditing"
+echo "4.1	Configure System Accounting (auditd)"
 #4.1.1	Configure Data Retention
 #4.1.1.1	Ensure audit log storage size is configured (Not Scored)
 #4.1.1.2	Ensure system is disabled when audit logs are full (Scored)
@@ -273,7 +322,7 @@ echo "1.1.1	Disable unused filesystems"
 #6.1.12	Ensure no ungrouped files or directories exist (Scored)
 #6.1.13	Audit SUID executables (Not Scored)
 #6.1.14	Audit SGID executables (Not Scored)
-#6.2	    User and Group Settings
+echo "6.2	    User and Group Settings"
 #6.2.1	Ensure password fields are not empty (Scored)
 #6.2.2	Ensure no legacy "+" entries exist in /etc/passwd (Scored)
 #6.2.3	Ensure no legacy "+" entries exist in /etc/shadow (Scored)
