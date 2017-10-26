@@ -69,6 +69,7 @@ CISCONF="/etc/modprobe.d/CIS.conf"
         echo "install udf /bin/true"        >>$CISCONF
         echo "install vfat /bin/true"       >>$CISCONF
 
+#these are highly suggested whith manual control
         CONTROL="1.1.2	Ensure separate partition exists for /tmp"
             echo "$CONTROL,$MP,Scored">> $LOG
         CONTROL="1.1.3	Ensure nodev option set on /tmp partition"
@@ -112,13 +113,31 @@ CISCONF="/etc/modprobe.d/CIS.conf"
         CONTROL="1.1.22	Disable Automounting"
             echo "$CONTROL,$MP,Scored">> $LOG
 
-    echo "1.2	Configure Software Updates"
-#1.2.1	Ensure package manager repositories are configured (Not Scored)
-#1.2.2	Ensure gpgcheck is globally activated (Scored)
+#-------------------------------------------------------------------------------
+#   partition        noexec      nodev      nosuid      location         
+#-------------------------------------------------------------------------------
+#    /	                no	        no	       no	        /
+#    /tmp	            yes	        yes        yes	        /tmp
+#    /var            	opt	        yes        yes	        /var
+#    /var/log	        opt	        yes        yes	        /var/log
+#    /var/log/audit	    opt	        yes	       yes	        /var/log/audit
+#    /var/tmp	        yes	        yes        yes      	/tmp
+#    /home           	opt     	yes	       yes	        /home
+#    /run/shm        	yes     	yes	       yes	        /run/shm
+#    External Media	    yes     	yes        yes	        /dev/*
+#-------------------------------------------------------------------------------
+# these scheme are highly suggested
+
+echo "1.2 Configure Software Updates"
+echo "1.2.1	Ensure package manager repositories are configured (Not Scored)"
+echo "1.2.2	Ensure gpgcheck is globally activated (Scored)"
+    sed -i 's/gpgcheck=0/gpgcheck=1/' /etc/yum.conf
 #1.2.3	Ensure GPG keys are configured (Not Scored)
+gpg --quiet --with-fingerprint /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+
 #1.2.4	Ensure Red Hat Network or Subscription Manager connection is configured (Not Scored)
 #1.2.5	Disable the rhnsd Daemon (Not Scored)
-#1.3	Filesystem Integrity Checking
+echo "1.3 Filesystem Integrity Checking"
 #1.3.1	Ensure AIDE is installed (Scored)
 #1.3.2	Ensure filesystem integrity is regularly checked (Scored)
 #1.4	Secure Boot Settings
