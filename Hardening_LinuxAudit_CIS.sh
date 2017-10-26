@@ -3,16 +3,18 @@
 # Descrição: Script Hardening em Sistemas Operacionais Linux.
 #------------------------------------------------------------------------------
 # Usabilidade:
-# - Efetuar Hardening baseado em normas utilizadas pelo CIS 2.2.1
+# - Efetuar Hardening baseado em normas utilizadas pelo CIS 2.1.1
 # - Utilizado no CentOs 6.9 | CentOs 7 | RHEL6 | RHEL 7
+# - ./Hardening_LinuxAudit_CIS.sh
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 # ID              Date   version
 # Roberto.Lima 2017.10.18 0.1  
 #------------------------------------------------------------------------------
 ###############################################################################
-################################################################################
-#Para efeito de auditoria requerem que a análise seja efetuda em modo root. 
+#set -x       #Descommentar essa linha para ver em modo debug o script
+###############################################################################
+#Para efeito de auditoria o requerimento inicial é que a análise seja efetuda em modo root. 
 #Verificar se o Script está sendo executado como Root#
 if [ "$EUID" -ne 0 ]
   then echo "Favor executar como root"
