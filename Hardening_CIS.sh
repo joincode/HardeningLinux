@@ -4,6 +4,7 @@
 #------------------------------------------------------------------------------
 # Usabilidade:
 # - Efetuar Hardening baseado em normas utilizadas pelo CIS 2.2.1
+# - Utilizado no CentOs 6.9 | CentOs 7 | RHEL6 | RHEL 7
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 # ID              Date   version
@@ -23,7 +24,7 @@ echo "Iniciando Script de Auditoria "
 HOST=`hostname`
 DATA=`date +"%d%m%Y-%H%M"`
 LOG='Auditoria-'$HOST'-'$DATA'.csv'
-#criar aquivo de Log
+#criar aquivo de Log para análise de ambiente
 touch $LOG
 ################################################################################
 echo "Iniciando Script de Auditoria " >> $LOG
@@ -455,7 +456,6 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 echo "1.7 Banners de aviso"
-##################################################################################
 echo "v1.7.1 Banners de advertência de linha de comando"
 #################################################################################
 CONTROL="1.7.1.1 Certifique-se de que a mensagem do dia esteja configurada corretamente"
@@ -509,7 +509,7 @@ fi
 CONTROL="1.7.2 Certifique-se de que o banner de login do GDM esteja configurado"
 echo "$CONTROL,exception">> $LOG
 ##################################################################################
-CONTROL="1.8 Certifique-se de que as atualizações, os patches e o software de segurança adicional estão instalados"
+CONTROL="1.8 Certifique-se de que as atualizações os patches e o software de segurança adicional estão instalados"
 yum check-update
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
@@ -522,7 +522,6 @@ echo "2.1 Serviços inetd"
 #Para efeito de auditoria, os serviços devem ser verificados de acordo com o ambiente proposto
 #Listaremos os Serviços em outro log para filtro de necessidade do ambiente.
 chkconfig --list >> AuditoriaServicos.csv
-##################################################################################
 CONTROL="2.1.1 Certifique-se de que os serviços de carga não estejam habilitados"
 echo "$CONTROL,exception">> $LOG
 CONTROL="2.1.2 Certifique-se de que os serviços diurnos não estão ativados"
@@ -622,35 +621,176 @@ if [ "$?" == "0" ]; then
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-
 CONTROL="2.2.16 Certifique-se de que o serviço rsync não esteja ativado"
-
+echo "$CONTROL,exception">> $LOG
+##################################################################################
 CONTROL="2.2.17 Certifique-se de que o NIS Server não está habilitado"
-
-
+echo "$CONTROL,exception">> $LOG
+##################################################################################
 echo "2.3 Clientes de serviço"
 CONTROL="2.3.1 Garantir que o NIS Client não esteja instalado"
+rpm -q ypbind
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="2.3.2 Certifique-se de que o cliente rsh não esteja instalado"
+rpm -q rsh
+if [ "$?" == "1" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="2.3.3 Certifique-se de que o cliente de conversação não esteja instalado"
+rpm -q talk
+if [ "$?" == "1" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="2.3.4 Certifique-se de que o cliente telnet não está instalado"
+rpm -q telnet
+if [ "$?" == "1" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="2.3.5 Certifique-se de que o cliente LDAP não esteja instalado"
-
-
-
-
-CONTROL="3 Configuração de rede"
-CONTROL="3.1 Parâmetros de rede (apenas host)"
+rpm -q openldap-clients
+if [ "$?" == "1" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+echo "3 Configuração de rede"
+echo "3.1 Parâmetros de rede (apenas host)"
 CONTROL="3.1.1 Certifique-se de que o reenvio de IP esteja desabilitado "
+sysctl net.ipv4.ip_forward
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.1.2 Certifique-se de que o envio do redirecionamento de pacotes esteja desativado"
-CONTROL="3.2 Parâmetros de Rede (Host e Roteador)"
+sysctl net.ipv4.conf.all.send_redirects
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+echo "3.2 Parâmetros de Rede (Host e Roteador)"
 CONTROL="3.2.1 Certifique-se de que os pacotes roteados de origem não são aceitos"
+sysctl net.ipv4.conf.all.accept_source_route
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="3.2.1.1 Certifique-se de que os pacotes roteados de origem não são aceitos"
+sysctl net.ipv4.conf.default.send_redirects
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.2.2 Certifique-se de que os redirecionamentos ICMP não são aceitos"
+sysctl net.ipv4.conf.all.accept_redirects
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="3.2.2.1 Certifique-se de que os redirecionamentos ICMP não são aceitos"
+sysctl net.ipv4.conf.default.accept_redirects
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.2.3 Certifique-se de que os redirecionamentos ICMP seguros não são aceitos"
+sysctl net.ipv4.conf.all.secure_redirects
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="3.2.3.1 Certifique-se de que os redirecionamentos ICMP seguros não são aceitos"
+sysctl net.ipv4.conf.default.secure_redirects
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.2.4 Certifique-se de que os pacotes suspeitos estejam registrados"
+sysctl net.ipv4.conf.all.log_martians
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="3.2.4.1 Certifique-se de que os pacotes suspeitos estejam registrados"
+sysctl net.ipv4.conf.default.log_martians
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.2.5 Certifique-se de que os pedidos de ICMP de transmissão são ignorados"
+sysctl net.ipv4.icmp_echo_ignore_broadcasts
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.2.6 Certifique-se de que as respostas ICMP falsas sejam ignoradas"
+sysctl net.ipv4.icmp_ignore_bogus_error_responses
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.2.7 Certifique-se de que o Filtro do caminho reverso está ativado "
+sysctl net.ipv4.conf.all.rp_filter
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="3.2.7.1 Certifique-se de que o Filtro do caminho reverso está ativado "
+sysctl net.ipv4.conf.default.rp_filter
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.2.8 Certifique-se de que TCP SYN Cookies esteja habilitado"
+sysctl net.ipv4.tcp_syncookies
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 echo "3.3 IPv6"
 CONTROL="3.3.1 Certifique-se de que as propagandas do roteador IPv6 não são aceitas "
 CONTROL="3.3.2 Certifique-se de que os redirecionamentos do IPv6 não são aceitos"
