@@ -20,7 +20,7 @@ if [ "$EUID" -ne 0 ]
   then echo "Favor executar como root"
   exit
 fi
-echo "Iniciando Script de Auditoria "
+#=================================Inicio da Auditoria==========================
 mkdir -p /root/Auditoria/
 ###############################################################################
 #Controle de variáveis de ambiente
@@ -29,6 +29,7 @@ DATA=`date +"%d%m%Y-%H%M"`
 LOG='/root/Auditoria/Auditoria-'$HOST'-'$DATA'.csv'
 #criar aquivo de Log para análise de ambiente
 touch $LOG
+#Usarei a variável CONTROL para cada controle auditado no arquivo .csv 
 ################################################################################
 echo "Iniciando Script de Auditoria " >> $LOG
 clear
@@ -266,7 +267,6 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 echo "1.2 Configurar atualizações de software"
-##################################################################################
 CONTROL="1.2.1 Certifique-se de que os repositórios do gerenciador de pacotes estão configurados"
 yum repolist
 if [ "$?" == "0" ]; then
@@ -308,7 +308,6 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 echo "1.3 Certificar integridade FileSystem"
-##################################################################################
 CONTROL="1.3.1 Certifique-se de que o AIDE esteja instalado"
 rpm -q aide
 if [ "$?" == "0" ]; then
@@ -326,7 +325,6 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 echo "1.4 Configurações de inicialização seguras"
-##################################################################################
 CONTROL="1.4.1 Assegure-se de que as permissões na configuração do bootloader estão configuradas"
 stat -L -c "%a" /etc/grub.conf | egrep ".00"
 if [ "$?" == "0" ]; then
@@ -337,11 +335,6 @@ fi
 ##################################################################################
 CONTROL="1.4.2 Certifique-se de que a senha do bootloader esteja configurada"
 echo "$CONTROL,exception">> $LOG
-#if [ "$?" == "0" ]; then
- # echo "$CONTROL,pass">> $LOG
-  #else
-  #echo "$CONTROL,fail">> $LOG
-#fi
 ##################################################################################
 CONTROL="1.4.3 Certifique-se de autenticação necessária para o modo de usuário único"
 grep "SINGLE=/sbin/sulogin" /etc/sysconfig/init && grep "PROMPT=no" /etc/sysconfig/init
@@ -520,8 +513,8 @@ if [ "$?" == "0" ]; then
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-echo "2 Serviços"
-echo "2.1 Serviços inetd"
+echo "2 Servicos"
+echo "2.1 Servicos inetd"
 #Para efeito de auditoria, os serviços devem ser verificados de acordo com o ambiente proposto
 #Listaremos os Serviços em outro log para filtro de necessidade do ambiente.
 chkconfig --list >> AuditoriaServicos.csv
@@ -546,7 +539,7 @@ echo "$CONTROL,exception">> $LOG
 CONTROL="2.1.10 Certifique-se de que o xinetd não está habilitado"
 echo "$CONTROL,exception">> $LOG
 ##################################################################################
-echo "2.2 Serviços de propósito especial"
+echo "2.2 Serviços de proposito especial"
 echo "2.2.1 Sincronização de tempo"
 CONTROL="2.2.1.1 Certifique-se de que a sincronização de tempo esteja em uso"
 rpm -q ntp
@@ -724,7 +717,7 @@ fi
 ##################################################################################
 CONTROL="3.2.3 Certifique-se de que os redirecionamentos ICMP seguros não são aceitos"
 sysctl net.ipv4.conf.all.secure_redirects
-if [ "$?" == "0" ]; then
+if [ "$?" == "1" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -732,7 +725,7 @@ fi
 ##################################################################################
 CONTROL="3.2.3.1 Certifique-se de que os redirecionamentos ICMP seguros não são aceitos"
 sysctl net.ipv4.conf.default.secure_redirects
-if [ "$?" == "0" ]; then
+if [ "$?" == "1" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -740,7 +733,7 @@ fi
 ##################################################################################
 CONTROL="3.2.4 Certifique-se de que os pacotes suspeitos estejam registrados"
 sysctl net.ipv4.conf.all.log_martians
-if [ "$?" == "0" ]; then
+if [ "$?" == "1" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -748,7 +741,7 @@ fi
 ##################################################################################
 CONTROL="3.2.4.1 Certifique-se de que os pacotes suspeitos estejam registrados"
 sysctl net.ipv4.conf.default.log_martians
-if [ "$?" == "0" ]; then
+if [ "$?" == "1" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -780,7 +773,7 @@ fi
 ##################################################################################
 CONTROL="3.2.7.1 Certifique-se de que o Filtro do caminho reverso está ativado "
 sysctl net.ipv4.conf.default.rp_filter
-if [ "$?" == "0" ]; then
+if [ "$?" == "1" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -788,7 +781,7 @@ fi
 ##################################################################################
 CONTROL="3.2.8 Certifique-se de que TCP SYN Cookies esteja habilitado"
 sysctl net.ipv4.tcp_syncookies
-if [ "$?" == "0" ]; then
+if [ "$?" == "1" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -796,141 +789,1013 @@ fi
 ##################################################################################
 echo "3.3 IPv6"
 CONTROL="3.3.1 Certifique-se de que as propagandas do roteador IPv6 não são aceitas "
+sysctl net.ipv6.conf.all.accept_ra
+if [ "$?" == "1" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="3.3.1.1 Certifique-se de que as propagandas do roteador IPv6 não são aceitas "
+sysctl net.ipv6.conf.default.accept_ra
+if [ "$?" == "1" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.3.2 Certifique-se de que os redirecionamentos do IPv6 não são aceitos"
+sysctl net.ipv6.conf.all.accept_redirects
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="3.3.2.2 Certifique-se de que os redirecionamentos do IPv6 não são aceitos"
+sysctl net.ipv6.conf.default.accept_redirects
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.3.3 Certifique-se de que o IPv6 esteja desativado"
-CONTROL="3.4 TCP Wrappers"
+modprobe -c | grep ipv6
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+echo "3.4 TCP Wrappers"
 CONTROL="3.4.1 Certifique-se de que o TCP Wrappers esteja instalado"
+rpm -q tcp_wrappers
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="3.4.1 Certifique-se de que o TCP Wrappers esteja instalado"
+rpm -q tcp_wrappers-libs
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.4.2 Garanta que /etc/hosts.allow esteja configurado"
+cat /etc/hosts.allow
+if [ "$?" == "1" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.4.3 Certifique-se de /etc/hosts.deny está configurado"
+cat /etc/hosts.deny
+if [ "$?" == "1" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.4.4 Certifique-se de que as permissões em /etc/hosts.allow estão configuradas"
+stat /etc/hosts.allow
+if [ "$?" == "1" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.4.5 Certifique-se de que as permissões em /etc/hosts.deny são 644"
-CONTROL="3.5 Protocolos de rede pouco frequentes"
+if [ "$?" == "1" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+echo "3.5 Protocolos de rede pouco frequentes"
 CONTROL="3.5.1 Certifique-se de que o DCCP esteja desativado"
+modprobe -n -v dccp
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.5.2 Certifique-se de que o SCTP esteja desativado"
+modprobe -n -v sctp
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.5.3 Certifique-se de que o RDS esteja desativado"
+modprobe -n -v rds
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.5.4 Certifique-se de que TIPC esteja desativado"
-CONTROL="3.6 Configuração do Firewall"
+modprobe -n -v tipc
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+echo "3.6 Configuração do Firewall"
+#O Iptables é uma aplicação de Firewall, que garante o mínimo de segurança desejavel, o script abaixo garante a pontuação inicial de acordo com o CIS_Benchmark_2.1.1
+#Para utilização durante a auditoria descomente as linhas abaixo, ou insira os códigos abaixo antes de iniciar a auditoria do sistema para que a pontuação seja aceitavel
+#==================Script IPTABLES=====================================
+#!/bin/bash
+# # Flush IPtables rules
+#  iptables -F 
+# # Ensure default deny firewall policy
+#   iptables -P INPUT DROP iptables -P OUTPUT DROP
+#   iptables -P FORWARD DROP
+# # Ensure loopback traffic is configured
+#   iptables -A INPUT -i lo -j ACCEPT
+#   iptables -A OUTPUT -o lo -j ACCEPT
+#   iptables -A INPUT -s 127.0.0.0/8 -j DROP
+# # Ensure outbound and established connections are configured
+#   iptables -A OUTPUT -p tcp -m state --state NEW,ESTABLISHED -j ACCEPT
+#   iptables -A OUTPUT -p udp -m state --state NEW,ESTABLISHED -j ACCEPT
+#   iptables -A OUTPUT -p icmp -m state --state NEW,ESTABLISHED -j ACCEPT
+#   iptables -A INPUT -p tcp -m state --state ESTABLISHED -j ACCEPT
+#   iptables -A INPUT -p udp -m state --state ESTABLISHED -j ACCEPT 
+#   iptables -A INPUT -p icmp -m state --state ESTABLISHED -j ACCEPT 
+# # Open inbound ssh(tcp port 22) connections
+#   iptables -A INPUT -p tcp --dport 22 -m state --state NEW -j ACCEPT
+#==================FIM do Script IPTABLES==============================
+##################################################################################
 CONTROL="3.6.1 Certifique-se de que o iptables esteja instalado"
+rpm -q iptables
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+#Não esquecer de aplicar as polícas mínimas para auditoria
 CONTROL="3.6.2 Certifique-se de que a política de firewall de negação predefinida"
+iptables -L
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.6.3 Certifique-se de que o tráfego de loopback esteja configurado"
+iptables -L INPUT -v -n
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.6.4 Certifique-se de que as conexões de saída e estabelecidas estão configuradas "
+iptables -L -v -n
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.6.5 Certifique-se de que existam regras de firewall para todas as portas abertas"
+netstat -ln
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="3.7 Certifique-se de que as interfaces sem fio estão desabilitadas "
+iwconfig
+if [ "$?" == "1" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 echo "4 Logging and Auditing"
 CONTROL="4.1 Configurar a Contabilidade do Sistema (auditd)"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.1 Configurar retenção de dados"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.1.1 Certifique-se de que o tamanho do armazenamento do log de auditoria esteja configurado"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.1.2 Certifique-se de que o sistema esteja desabilitado quando os logs de auditoria estiverem cheios"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.1.3 Certifique-se de que os logs de auditoria não sejam excluídos automaticamente"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.2 Certifique-se de que o serviço de auditoria esteja ativado"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.3 Certifique-se de que a auditoria dos processos iniciados antes da auditoria esteja habilitada"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.4 Certifique-se de que os eventos que modificam as informações de data e hora são coletados"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.5 Certifique-se de que os eventos que modificam as informações do usuário / grupo são coletados"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.6 Certifique-se de que os eventos que modificam o ambiente de rede do sistema são coletados"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.7 Certifique-se de que os eventos que modificam os controles de acesso obrigatórios do sistema são coletados"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.8 Certifique-se de que os eventos de login e logout sejam coletados"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.9 Certifique-se de que as informações de iniciação da sessão sejam coletadas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.10 Certifique-se de que os eventos de modificação de permissão de controle de acesso discricionário sejam coletados"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.11 Certifique-se de que as tentativas de acesso a arquivos não-aprovadas mal sucedidas sejam coletadas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.12 Certifique-se de que o uso de comandos privilegiados seja coletado"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.13 Certifique-se de que as montagens bem sucedidas do sistema de arquivos sejam coletadas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.14 Certifique-se de que os eventos de exclusão de arquivos pelos usuários sejam coletados"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.15 Assegure-se de que as mudanças no escopo de administração do sistema (sudoers) sejam coletadas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.16 Certifique-se de que as ações do administrador do sistema (sudolog) sejam coletadas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.17 Certifique-se de que o carregamento e descarregamento do módulo do kernel seja coletado"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.1.18 Certifique-se de que a configuração da auditoria seja imutável"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.2 Configure o registro"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.2.1 Configurar rsyslog"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.2.1.1 Certifique-se de que rsyslog Service esteja ativado"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.2.1.2 Certifique-se de que o log está configurado"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.2.1.3 Certifique-se de que as permissões de arquivo padrão do rsyslog estão configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.2.1.4 Certifique-se de que rsyslog esteja configurado para enviar logs para um host de log remoto)"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.2.1.5 Certifique-se de que as mensagens rsyslog remotas só são aceitas em hosts de log designados."
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.2.2 Configure syslog-ng"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.2.2.1 Certifique-se de que o serviço syslog-ng esteja ativado"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.2.2.2 Certifique-se de que o log está configurado"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.2.2.3 Certifique-se de que as permissões de arquivo padrão do syslog-ng foram configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
 CONTROL="4.2.2.4 Certifique-se de que syslog-ng esteja configurado para enviar logs para um host de log remoto"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.2.2.5 Assegure-se de que as mensagens remotas do syslog-ng só são aceitas em hosts de log designados (Não marcados)"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.2.3 Certifique-se de que rsyslog ou syslog-ng esteja instalado"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.2.4 Certifique-se de que as permissões em todos os arquivos de log estão configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="4.3 Certifique-se de que Logrotate esteja configurado"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 echo "5 Acesso, Autenticação e Autorização"
 CONTROL="5.1 Configure o cron"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.1.1 Certifique-se de que o daemon cron esteja habilitado"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.1.2 Certifique-se de que as permissões em / etc / crontab estejam configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.1.3 Certifique-se de que as permissões em /etc/cron.hourly estão configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.1.4 Certifique-se de que as permissões em /etc/cron.daily estão configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.1.5 Certifique-se de que as permissões em /etc/cron.weekly estão configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.1.6 Certifique-se de que as permissões em /etc/cron.monthly estão configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.1.7 Certifique-se de que as permissões em /etc/cron.d estão configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.1.8 Certifique-se de que / cron esteja restrito a usuários autorizados"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.2 Configuração do servidor SSH"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.2.1 Certifique-se de que as permissões em / etc / ssh / sshd_config estejam configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.2.2 Certifique-se de que o protocolo SSH esteja definido como 2 "
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
 CONTROL="5.2.3 Certifique-se de que SSH LogLevel esteja configurado para INFO"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.2.4 Certifique-se de que o encaminhamento do SSH X11 esteja desabilitado "
+
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.2.5 Certifique-se de que SSH MaxAuthTries esteja configurado para 4 ou menos"
+
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.2.6 Certifique-se de que SSH IgnoreRhosts esteja habilitado"
+
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.2.7 Certifique-se de que SSH HostbasedAuthentication esteja desativado"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.2.8 Certifique-se de que o login do root SSH esteja desativado"
+
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.2.9 Certifique-se de que SSH PermitEmptyPasswords esteja desabilitado"
+
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.2.10 Certifique-se de que SSH PermitUserEnvironment esteja desativado"
+
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.2.11 Certifique-se de que somente os algoritmos MAC aprovados sejam usados ​"
+
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.2.12 Certifique-se de que SSH Idle Timeout Interval esteja configurado"
+
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.2.13 Certifique-se de que SSH LoginGraceTime esteja configurado para um minuto ou menos"
+
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.2.14 Certifique-se de que o acesso SSH é limitado "
+
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.2.15 Certifique-se de que o banner de aviso SSH esteja configurado"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.3 Configurar PAM"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.3.1 Certifique-se de que os requisitos de criação de senha estão configurados"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.3.2 Certifique-se de que o bloqueio para tentativas de senha com falha esteja configurado"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.3.3 Certifique-se de que a reutilização de senhas seja limitada"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.3.4 Certifique-se de que o algoritmo de hashing de senha seja SHA-512"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.4 Contas de usuário e ambiente"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.4.1 Definir os Parâmetros do Suite da Senha de Sombra"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.4.1.1 Certifique-se de que a expiração da senha é de 90 dias ou menos"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.4.1.2 Certifique-se de que os dias mínimos entre as alterações de senha sejam 7 ou mais"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.4.1.3 Certifique-se de que os dias de aviso de expiração da senha sejam 7 ou mais"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.4.1.4 Certifique-se de que o bloqueio de senha inativo seja de 30 dias ou menos"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.4.2 Assegure-se de que as contas do sistema não sejam de login"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.4.3 Verifique se o grupo padrão para a conta raiz é GID 0CONTROL="
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.4.4 Certifique-se de que o umask de usuário padrão seja 027 ou mais restritivo"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.5 Certifique-se de que o login do root esteja restrito ao console do sistema"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="5.6 Certifique-se de que o acesso ao comando su esteja restrito "
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 echo "6 Manutenção do sistema"
 CONTROL="6.1 Permissões do arquivo do sistema"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.1.1 Permissões do arquivo do sistema de auditoria"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.1.2 Certifique-se de que as permissões no / etc / passwd estão configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.1.3 Certifique-se de que as permissões em / etc / shadow estão configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.1.4 Certifique-se de que as permissões no / etc / group estejam configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.1.5 Certifique-se de que as permissões em / etc / shadow estejam configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.1.6 Certifique-se de que as permissões no / etc / passwd- estão configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.1.7 Certifique-se de que as permissões em / etc / shadow- estão configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.1.8 Certifique-se de que as permissões no / etc / group- estejam configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.1.9 Certifique-se de que as permissões em / etc / gshadow estão configuradas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.1.10 Certifique-se de que não existam arquivos mundiais graváveis ​"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.1.11 Certifique-se de que não existam arquivos ou diretórios não possuídos"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.1.12 Certifique-se de que não existem arquivos ou diretórios desagrupados"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.1.13 Auditoria SUID executáveis ​​"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.1.14 Auditoria SGID executáveis ​​"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2 Configurações de Usuário e Grupo"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.1 Certifique-se de que os campos de senha não estejam vazios"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.2 Certifique-se de que não existam entradas "+" legadas em / etc / passwd"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.3 Certifique-se de que não existam entradas "+" legadas em / etc / shadow"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.4 Certifique-se de que não existam entradas "+" legadas em / etc / group"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.5 Certifique-se de que a raiz seja a única conta UID 0"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.6 Certifique-se de integridade da PATH raiz "
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.7 Certifique-se de que todos os diretórios domésticos de todos os usuários existam"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.8 Assegure-se de que as permissões dos diretórios domésticos dos usuários sejam 750 ou mais restritivas"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.9 Certifique-se de que os usuários possuem seus diretórios domésticos"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.10 Assegure-se de que os arquivos de ponto dos usuários não sejam gravados em grupo ou gravados no mundo"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.11 Certifique-se de que nenhum usuário tenha arquivos .forward"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.12 Certifique-se de que nenhum usuário tenha arquivos .netrc"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.13 Certifique-se de que os arquivos .netrc dos usuários não sejam acessíveis ao grupo ou ao mundo"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.14 Certifique-se de que nenhum usuário tenha arquivos .rhosts"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.15 Certifique-se de que todos os grupos em / etc / passwd existem em / etc / group"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.16 Certifique-se de que não existem UID duplicados"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.17 Certifique-se de que não existam GID duplicados"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.18 Certifique-se de que não existam nomes de usuários duplicados"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.19 Certifique-se de que não existam nomes de grupos duplicados"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 CONTROL="6.2.20 Certifique-se de que o grupo das sombras esteja vazio"
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+#===============================Audiotiria do Sistema Finalizada==================

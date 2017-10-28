@@ -133,6 +133,7 @@ echo "1.2.1	Ensure package manager repositories are configured (Not Scored)"
 echo "1.2.2	Ensure gpgcheck is globally activated (Scored)"
     sed -i 's/gpgcheck=0/gpgcheck=1/' /etc/yum.conf
 #1.2.3	Ensure GPG keys are configured (Not Scored)
+#efetuar verificação de chaves para o CentOs6 e 7
 gpg --quiet --with-fingerprint /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
 
 #1.2.4	Ensure Red Hat Network or Subscription Manager connection is configured (Not Scored)
