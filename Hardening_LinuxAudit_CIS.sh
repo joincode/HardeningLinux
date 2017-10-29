@@ -983,22 +983,26 @@ if [ "$?" == "1" ]; then
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
+CONTROL="3.7.1 Certifique-se de que as interfaces sem fio estão desabilitadas "
+ip link show up
+if [ "$?" == "1" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
 echo "4 Logging and Auditing"
 CONTROL="4.1 Configurar a Contabilidade do Sistema (auditd)"
-if [ "$?" == "0" ]; then
+service auditd reload
+if [ "$?" == "1" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-CONTROL="4.1.1 Configurar retenção de dados"
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
-##################################################################################
+echo "4.1.1 Configurar retenção de dados"
 CONTROL="4.1.1.1 Certifique-se de que o tamanho do armazenamento do log de auditoria esteja configurado"
+grep max_log_file /etc/audit/auditd.conf
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1006,6 +1010,23 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.1.2 Certifique-se de que o sistema esteja desabilitado quando os logs de auditoria estiverem cheios"
+grep space_left_action /etc/audit/auditd.conf
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="4.1.1.2.1 Certifique-se de que o sistema esteja desabilitado quando os logs de auditoria estiverem cheios"
+grep action_mail_acct /etc/audit/auditd.conf
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="4.1.1.2.2 Certifique-se de que o sistema esteja desabilitado quando os logs de auditoria estiverem cheios"
+grep admin_space_left_action /etc/audit/auditd.conf
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1013,6 +1034,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.1.3 Certifique-se de que os logs de auditoria não sejam excluídos automaticamente"
+grep max_log_file_action /etc/audit/auditd.conf
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1020,6 +1042,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.2 Certifique-se de que o serviço de auditoria esteja ativado"
+service audit status
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1027,6 +1050,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.3 Certifique-se de que a auditoria dos processos iniciados antes da auditoria esteja habilitada"
+grep "^\s*linux" /boot/grub2/grub.cfg
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1034,13 +1058,24 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.4 Certifique-se de que os eventos que modificam as informações de data e hora são coletados"
+grep time-change /etc/audit/audit.rules
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
+CONTROL="4.1.4.1 Certifique-se de que os eventos que modificam as informações de data e hora são coletados"
+grep time-change /etc/audit/audit.rules
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+
 CONTROL="4.1.5 Certifique-se de que os eventos que modificam as informações do usuário / grupo são coletados"
+grep identity /etc/audit/audit.rules
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1048,6 +1083,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.6 Certifique-se de que os eventos que modificam o ambiente de rede do sistema são coletados"
+grep system-locale /etc/audit/audit.rules
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1055,6 +1091,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.7 Certifique-se de que os eventos que modificam os controles de acesso obrigatórios do sistema são coletados"
+grep MAC-policy /etc/audit/audit.rules
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1062,6 +1099,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.8 Certifique-se de que os eventos de login e logout sejam coletados"
+grep logins /etc/audit/audit.rules
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1069,6 +1107,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.9 Certifique-se de que as informações de iniciação da sessão sejam coletadas"
+grep session /etc/audit/audit.rules
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1076,6 +1115,15 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.10 Certifique-se de que os eventos de modificação de permissão de controle de acesso discricionário sejam coletados"
+grep perm_mod /etc/audit/audit.rules
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="4.1.10.1 Certifique-se de que os eventos de modificação de permissão de controle de acesso discricionário sejam coletados"
+grep perm_mod /etc/audit/audit.rules
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1083,6 +1131,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.11 Certifique-se de que as tentativas de acesso a arquivos não-aprovadas mal sucedidas sejam coletadas"
+grep access /etc/audit/audit.rules
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1090,6 +1139,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.12 Certifique-se de que o uso de comandos privilegiados seja coletado"
+find <partition> -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print "-a always,exit -F path=" $1 " -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged" }'
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1097,20 +1147,41 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.13 Certifique-se de que as montagens bem sucedidas do sistema de arquivos sejam coletadas"
+grep mounts /etc/audit/audit.rules -a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
+CONTROL="4.1.13.1 Certifique-se de que as montagens bem sucedidas do sistema de arquivos sejam coletadas(64)"
+grep mounts /etc/audit/audit.rules
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+
 CONTROL="4.1.14 Certifique-se de que os eventos de exclusão de arquivos pelos usuários sejam coletados"
+grep delete /etc/audit/audit.rules
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
+CONTROL="4.1.14.1 Certifique-se de que os eventos de exclusão de arquivos pelos usuários sejam coletados"
+grep delete /etc/audit/audit.rules
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+
 CONTROL="4.1.15 Assegure-se de que as mudanças no escopo de administração do sistema (sudoers) sejam coletadas"
+grep scope /etc/audit/audit.rules
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1118,6 +1189,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.16 Certifique-se de que as ações do administrador do sistema (sudolog) sejam coletadas"
+grep actions /etc/audit/audit.rules
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1125,6 +1197,15 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.17 Certifique-se de que o carregamento e descarregamento do módulo do kernel seja coletado"
+grep modules /etc/audit/audit.rules
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="4.1.17.1 Certifique-se de que o carregamento e descarregamento do módulo do kernel seja coletado"
+grep modules /etc/audit/audit.rules
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1132,27 +1213,17 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.18 Certifique-se de que a configuração da auditoria seja imutável"
+grep "^\s*[^#]" /etc/audit/audit.rules | tail -1
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-CONTROL="4.2 Configure o registro"
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
-##################################################################################
-CONTROL="4.2.1 Configurar rsyslog"
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
-##################################################################################
+echo "4.2 Configure o registro"
+echo "4.2.1 Configurar rsyslog"
 CONTROL="4.2.1.1 Certifique-se de que rsyslog Service esteja ativado"
+service rsyslog status
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1160,6 +1231,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.2.1.2 Certifique-se de que o log está configurado"
+ls -l /var/log/
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1167,6 +1239,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.2.1.3 Certifique-se de que as permissões de arquivo padrão do rsyslog estão configuradas"
+grep ^\$FileCreateMode /etc/rsyslog.conf
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1174,6 +1247,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.2.1.4 Certifique-se de que rsyslog esteja configurado para enviar logs para um host de log remoto)"
+grep "^*.*[^I][^I]*@" /etc/rsyslog.conf
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1181,20 +1255,16 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.2.1.5 Certifique-se de que as mensagens rsyslog remotas só são aceitas em hosts de log designados."
+grep '$ModLoad imtcp.so' /etc/rsyslog.conf
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-CONTROL="4.2.2 Configure syslog-ng"
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
-##################################################################################
+echo "4.2.2 Configure syslog-ng"
 CONTROL="4.2.2.1 Certifique-se de que o serviço syslog-ng esteja ativado"
+service syslog-ng status
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1202,6 +1272,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.2.2.2 Certifique-se de que o log está configurado"
+ls -l /var/log/
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1209,12 +1280,14 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.2.2.3 Certifique-se de que as permissões de arquivo padrão do syslog-ng foram configuradas"
+grep ^options /etc/syslog-ng/syslog-ng.conf
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 CONTROL="4.2.2.4 Certifique-se de que syslog-ng esteja configurado para enviar logs para um host de log remoto"
+cat /etc/syslog-ng/syslog-ng.conf
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1222,6 +1295,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.2.2.5 Assegure-se de que as mensagens remotas do syslog-ng só são aceitas em hosts de log designados (Não marcados)"
+cat /etc/syslog-ng/syslog-ng.conf
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1229,6 +1303,15 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.2.3 Certifique-se de que rsyslog ou syslog-ng esteja instalado"
+rpm -q rsyslog
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="4.2.3.1 Certifique-se de que rsyslog ou syslog-ng esteja instalado"
+rpm -q syslog-ng
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1236,6 +1319,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.2.4 Certifique-se de que as permissões em todos os arquivos de log estão configuradas"
+find /var/log -type f -ls
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1243,6 +1327,15 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.3 Certifique-se de que Logrotate esteja configurado"
+cat /etc/logrotate.conf
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="4.3.1 Certifique-se de que Logrotate esteja configurado"
+cat /etc/logrotate.d/ *
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1250,14 +1343,9 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 echo "5 Acesso, Autenticação e Autorização"
-CONTROL="5.1 Configure o cron"
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
-##################################################################################
+echo "5.1 Configure o cron"
 CONTROL="5.1.1 Certifique-se de que o daemon cron esteja habilitado"
+service crond status
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1265,6 +1353,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.1.2 Certifique-se de que as permissões em / etc / crontab estejam configuradas"
+stat /etc/crontab
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1272,6 +1361,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.1.3 Certifique-se de que as permissões em /etc/cron.hourly estão configuradas"
+stat /etc/cron.hourly
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1279,6 +1369,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.1.4 Certifique-se de que as permissões em /etc/cron.daily estão configuradas"
+stat /etc/cron.daily
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1286,6 +1377,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.1.5 Certifique-se de que as permissões em /etc/cron.weekly estão configuradas"
+stat /etc/cron.weekly
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1293,6 +1385,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.1.6 Certifique-se de que as permissões em /etc/cron.monthly estão configuradas"
+stat /etc/cron.monthly
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1300,6 +1393,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.1.7 Certifique-se de que as permissões em /etc/cron.d estão configuradas"
+stat /etc/cron.d
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1307,6 +1401,31 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.1.8 Certifique-se de que / cron esteja restrito a usuários autorizados"
+stat /etc/cron.deny
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.1.8.1 Certifique-se de que / cron esteja restrito a usuários autorizados"
+stat /etc/at.deny
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.1.8.2 Certifique-se de que / cron esteja restrito a usuários autorizados"
+stat /etc/cron.allow
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.1.8.3 Certifique-se de que / cron esteja restrito a usuários autorizados"
+stat /etc/at.allow
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1314,6 +1433,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.2 Configuração do servidor SSH"
+service sshd status
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1321,6 +1441,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.2.1 Certifique-se de que as permissões em / etc / ssh / sshd_config estejam configuradas"
+stat /etc/ssh/sshd_config
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1328,12 +1449,15 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.2.2 Certifique-se de que o protocolo SSH esteja definido como 2 "
+grep "^Protocol" /etc/ssh/sshd_config
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
+##################################################################################
 CONTROL="5.2.3 Certifique-se de que SSH LogLevel esteja configurado para INFO"
+grep "^LogLevel" /etc/ssh/sshd_config
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1341,15 +1465,15 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.2.4 Certifique-se de que o encaminhamento do SSH X11 esteja desabilitado "
-
-if [ "$?" == "0" ]; then
+grep "^X11Forwarding" /etc/ssh/sshd_config
+if [ "$?" == "1" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
 CONTROL="5.2.5 Certifique-se de que SSH MaxAuthTries esteja configurado para 4 ou menos"
-
+grep "^MaxAuthTries" /etc/ssh/sshd_config
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1357,7 +1481,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.2.6 Certifique-se de que SSH IgnoreRhosts esteja habilitado"
-
+grep "^IgnoreRhosts" /etc/ssh/sshd_config
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1365,14 +1489,15 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.2.7 Certifique-se de que SSH HostbasedAuthentication esteja desativado"
-if [ "$?" == "0" ]; then
+grep "^HostbasedAuthentication" /etc/ssh/sshd_config
+if [ "$?" == "1" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
 CONTROL="5.2.8 Certifique-se de que o login do root SSH esteja desativado"
-
+grep "^PermitRootLogin" /etc/ssh/sshd_config
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1380,7 +1505,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.2.9 Certifique-se de que SSH PermitEmptyPasswords esteja desabilitado"
-
+grep "^PermitEmptyPasswords" /etc/ssh/sshd_config
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1388,7 +1513,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.2.10 Certifique-se de que SSH PermitUserEnvironment esteja desativado"
-
+grep PermitUserEnvironment /etc/ssh/sshd_config
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1396,7 +1521,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.2.11 Certifique-se de que somente os algoritmos MAC aprovados sejam usados ​"
-
+grep "Ciphers" /etc/ssh/sshd_config
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1404,7 +1529,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.2.12 Certifique-se de que SSH Idle Timeout Interval esteja configurado"
-
+grep "MACs" /etc/ssh/sshd_config
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1412,7 +1537,15 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.2.13 Certifique-se de que SSH LoginGraceTime esteja configurado para um minuto ou menos"
-
+grep "^ClientAliveInterval" /etc/ssh/sshd_config
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.2.13.1 Certifique-se de que SSH LoginGraceTime esteja configurado para um minuto ou menos"
+grep "^ClientAliveCountMax" /etc/ssh/sshd_config
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1420,7 +1553,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.2.14 Certifique-se de que o acesso SSH é limitado "
-
+grep "^LoginGraceTime" /etc/ssh/sshd_config
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1428,20 +1561,96 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.2.15 Certifique-se de que o banner de aviso SSH esteja configurado"
+grep "^AllowUsers" /etc/ssh/sshd_config
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-CONTROL="5.3 Configurar PAM"
+CONTROL="5.2.15.1 Certifique-se de que o banner de aviso SSH esteja configurado"
+grep "^AllowGroups" /etc/ssh/sshd_config
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
+CONTROL="5.2.15.2 Certifique-se de que o banner de aviso SSH esteja configurado"
+ grep "^DenyUsers" /etc/ssh/sshd_config
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.2.15.3 Certifique-se de que o banner de aviso SSH esteja configurado"
+grep "^DenyGroups" /etc/ssh/sshd_config
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.2.16 Verifique se o banner de aviso SSH está configurado"
+grep "^Banner" /etc/ssh/sshd_config
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+echo "5.3 Configurar PAM"
 CONTROL="5.3.1 Certifique-se de que os requisitos de criação de senha estão configurados"
+grep pam_pwquality.so /etc/pam.d/password-auth
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.3.1.1 Certifique-se de que os requisitos de criação de senha estão configurados"
+grep pam_pwquality.so /etc/pam.d/system-auth
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.3.1.2 Certifique-se de que os requisitos de criação de senha estão configurados"
+grep ^minlen /etc/security/pwquality.conf
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.3.1.3 Certifique-se de que os requisitos de criação de senha estão configurados"
+grep ^dcredit /etc/security/pwquality.conf
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.3.1.4 Certifique-se de que os requisitos de criação de senha estão configurados"
+grep ^lcredit /etc/security/pwquality.conf
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.3.1.5 Certifique-se de que os requisitos de criação de senha estão configurados"
+grep ^ocredit /etc/security/pwquality.conf
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.3.1.6 Certifique-se de que os requisitos de criação de senha estão configurados"
+grep ^ucredit /etc/security/pwquality.conf
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1449,6 +1658,15 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.3.2 Certifique-se de que o bloqueio para tentativas de senha com falha esteja configurado"
+cat /etc/pam.d/password-auth
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.3.2.1 Certifique-se de que o bloqueio para tentativas de senha com falha esteja configurado"
+cat /etc/pam.d/system-auth
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1456,6 +1674,15 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.3.3 Certifique-se de que a reutilização de senhas seja limitada"
+egrep '^password\s+sufficient\s+pam_unix.so' /etc/pam.d/password-auth
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.3.3.1 Certifique-se de que a reutilização de senhas seja limitada"
+egrep '^password\s+sufficient\s+pam_unix.so' /etc/pam.d/system-auth
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1463,55 +1690,109 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.3.4 Certifique-se de que o algoritmo de hashing de senha seja SHA-512"
+egrep '^password\s+sufficient\s+pam_unix.so' /etc/pam.d/password-auth
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-CONTROL="5.4 Contas de usuário e ambiente"
+CONTROL="5.3.4.1 Certifique-se de que o algoritmo de hashing de senha seja SHA-512"
+egrep '^password\s+sufficient\s+pam_unix.so' /etc/pam.d/system-auth
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-CONTROL="5.4.1 Definir os Parâmetros do Suite da Senha de Sombra"
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
-##################################################################################
+echo "5.4 Contas de usuário e ambiente"
+echo "5.4.1 Definir os Parâmetros do Suite da Senha de Sombra"
 CONTROL="5.4.1.1 Certifique-se de que a expiração da senha é de 90 dias ou menos"
+grep PASS_MAX_DAYS /etc/login.defs
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
+##################################################################################
+CONTROL="5.4.1.1.1 Certifique-se de que a expiração da senha é de 90 dias ou menos"
+egrep ^[^:]+:[^\!*] /etc/shadow | cut -d: -f1
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.4.1.1.2 Certifique-se de que a expiração da senha é de 90 dias ou menos"
+#chage --list #<user>
+#Necessário verificação por usuário
+  echo "$CONTROL,excepition">> $LOG
 ##################################################################################
 CONTROL="5.4.1.2 Certifique-se de que os dias mínimos entre as alterações de senha sejam 7 ou mais"
+grep PASS_MIN_DAYS /etc/login.defs
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
+##################################################################################
+CONTROL="5.4.1.2.1 Certifique-se de que os dias mínimos entre as alterações de senha sejam 7 ou mais"
+egrep ^[^:]+:[^\!*] /etc/shadow | cut -d: -f1
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.4.1.2.2 Certifique-se de que os dias mínimos entre as alterações de senha sejam 7 ou mais"
+#chage --list #<user>
+#Necessário verificação por usuário
+  echo "$CONTROL,exception">> $LOG
 ##################################################################################
 CONTROL="5.4.1.3 Certifique-se de que os dias de aviso de expiração da senha sejam 7 ou mais"
+grep PASS_WARN_AGE /etc/login.defs
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
+##################################################################################
+CONTROL="5.4.1.3.1 Certifique-se de que os dias de aviso de expiração da senha sejam 7 ou mais"
+egrep ^[^:]+:[^\!*] /etc/shadow | cut -d: -f1
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.4.1.3.2 Certifique-se de que os dias de aviso de expiração da senha sejam 7 ou mais"
+#chage --list #<user>
+#Necessário verificação por usuário
+  echo "$CONTROL,exception">> $LOG
 ##################################################################################
 CONTROL="5.4.1.4 Certifique-se de que o bloqueio de senha inativo seja de 30 dias ou menos"
+useradd -D | grep INACTIVE
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
+CONTROL="5.4.1.4.1 Certifique-se de que o bloqueio de senha inativo seja de 30 dias ou menos"
+egrep ^[^:]+:[^\!*] /etc/shadow | cut -d: -f1
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.4.1.4.1 Certifique-se de que o bloqueio de senha inativo seja de 30 dias ou menos"
+#chage --list #<user>
+#Necessário verificação por usuário
+  echo "$CONTROL,exception">> $LOG
+##################################################################################
 CONTROL="5.4.2 Assegure-se de que as contas do sistema não sejam de login"
+egrep -v "^\+" /etc/passwd | awk -F: '($1!="root" && $1!="sync" && $1!="shutdown" && $1!="halt" && $3<1000 && $7!="/sbin/nologin" && $7!="/bin/false") {print}'
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1519,6 +1800,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.4.3 Verifique se o grupo padrão para a conta raiz é GID 0CONTROL="
+grep "^root:" /etc/passwd | cut -f4 -d:
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1526,6 +1808,15 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.4.4 Certifique-se de que o umask de usuário padrão seja 027 ou mais restritivo"
+grep "^umask" /etc/bashrc
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.4.4.1 Certifique-se de que o umask de usuário padrão seja 027 ou mais restritivo"
+grep "^umask" /etc/profile
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1533,6 +1824,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.5 Certifique-se de que o login do root esteja restrito ao console do sistema"
+cat /etc/securetty
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1540,6 +1832,15 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="5.6 Certifique-se de que o acesso ao comando su esteja restrito "
+grep pam_wheel.so /etc/pam.d/su
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="5.6.1 Certifique-se de que o acesso ao comando su esteja restrito "
+grep wheel /etc/group
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1547,14 +1848,25 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 echo "6 Manutenção do sistema"
-CONTROL="6.1 Permissões do arquivo do sistema"
+echo "6.1 Permissões do arquivo do sistema"
+CONTROL="6.1.1 Permissões do arquivo do sistema de auditoria"
+rpm -qf /bin/bash
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-CONTROL="6.1.1 Permissões do arquivo do sistema de auditoria"
+CONTROL="6.1.1.1 Permissões do arquivo do sistema de auditoria"
+rpm -V bash-4.1.2-29.el6.x86_64
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="6.1.1.1 Permissões do arquivo do sistema de auditoria"
+rpm -V `rpm -qf /etc/passwd`
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1562,6 +1874,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="6.1.2 Certifique-se de que as permissões no / etc / passwd estão configuradas"
+stat /etc/passwd
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
