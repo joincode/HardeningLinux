@@ -1873,6 +1873,15 @@ if [ "$?" == "0" ]; then
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
+CONTROL="6.1.1.2 Permissões do arquivo do sistema de auditoria"
+rpm -Va --nomtime --nosize --nomd5 --nolinkto > /root/Auditoria/Auditoria-$CONTROL.csv
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+
 CONTROL="6.1.2 Certifique-se de que as permissões no / etc / passwd estão configuradas"
 stat /etc/passwd
 if [ "$?" == "0" ]; then
@@ -1889,6 +1898,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="6.1.4 Certifique-se de que as permissões no / etc / group estejam configuradas"
+stat /etc/group
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1896,6 +1906,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="6.1.5 Certifique-se de que as permissões em / etc / shadow estejam configuradas"
+stat /etc/gshadow
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1903,6 +1914,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="6.1.6 Certifique-se de que as permissões no / etc / passwd- estão configuradas"
+stat /etc/passwd-
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1910,6 +1922,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="6.1.7 Certifique-se de que as permissões em / etc / shadow- estão configuradas"
+stat /etc/shadow-
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1917,6 +1930,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="6.1.8 Certifique-se de que as permissões no / etc / group- estejam configuradas"
+stat /etc/group-
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1924,6 +1938,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="6.1.9 Certifique-se de que as permissões em / etc / gshadow estão configuradas"
+stat /etc/gshadow-
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1931,6 +1946,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="6.1.10 Certifique-se de que não existam arquivos mundiais graváveis ​"
+df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -0002
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1938,6 +1954,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="6.1.11 Certifique-se de que não existam arquivos ou diretórios não possuídos"
+df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -nouser
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1945,6 +1962,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="6.1.12 Certifique-se de que não existem arquivos ou diretórios desagrupados"
+df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -nogroup
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1952,6 +1970,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="6.1.13 Auditoria SUID executáveis ​​"
+df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -4000
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1959,20 +1978,16 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="6.1.14 Auditoria SGID executáveis ​​"
+df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -2000
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-CONTROL="6.2 Configurações de Usuário e Grupo"
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
-##################################################################################
+echo "6.2 Configurações de Usuário e Grupo"
 CONTROL="6.2.1 Certifique-se de que os campos de senha não estejam vazios"
+cat /etc/shadow | awk -F: '($2 == "" ) { print $1 " does not have a password "}'
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1980,13 +1995,15 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="6.2.2 Certifique-se de que não existam entradas "+" legadas em / etc / passwd"
-if [ "$?" == "0" ]; then
+grep '^+:' /etc/passwd
+if [ "$?" == "1" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
 CONTROL="6.2.3 Certifique-se de que não existam entradas "+" legadas em / etc / shadow"
+grep '^+:' /etc/shadow
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1994,6 +2011,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="6.2.4 Certifique-se de que não existam entradas "+" legadas em / etc / group"
+grep '^+:' /etc/group
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -2001,14 +2019,16 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="6.2.5 Certifique-se de que a raiz seja a única conta UID 0"
+cat /etc/passwd | awk -F: '($3 == 0) { print $1 }'
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
+#executarscrit controle 6.2.6
 CONTROL="6.2.6 Certifique-se de integridade da PATH raiz "
-if [ "$?" == "0" ]; then
+  if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
