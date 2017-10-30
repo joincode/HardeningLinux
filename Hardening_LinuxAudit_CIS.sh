@@ -27,6 +27,7 @@ mkdir -p /root/Auditoria/
 HOST=`hostname`
 DATA=`date +"%d%m%Y-%H%M"`
 LOG='/root/Auditoria/Auditoria-'$HOST'-'$DATA'.csv'
+LOGSERVICE='/root/Auditoria/AuditoriaServicos-'$HOST'-'$DATA'.csv'
 #criar aquivo de Log para analise de ambiente
 touch $LOG
 #Usarei a variavel CONTROL para cada controle auditado no arquivo .csv 
@@ -386,7 +387,6 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 echo "1.6 Controle de acesso obrigatorio"
-##################################################################################
 CONTROL="1.6.1 Configurar o SELinux"
 grep "selinux=0\|enforcing=0" /etc/grub.conf
 if [ "$?" == "0" ]; then
@@ -517,7 +517,7 @@ echo "2 Servicos"
 echo "2.1 Servicos inetd"
 #Para efeito de auditoria, os servicos devem ser verificados de acordo com o ambiente proposto
 #Listaremos os Servicos em outro log para filtro de necessidade do ambiente.
-chkconfig --list >> AuditoriaServicos.csv
+chkconfig --list >> $LOGSERVICE
 CONTROL="2.1.1 Certifique-se de que os servicos de carga nao estejam habilitados"
 echo "$CONTROL,exception">> $LOG
 CONTROL="2.1.2 Certifique-se de que os servicos diurnos nao estao ativados"
@@ -1865,7 +1865,15 @@ if [ "$?" == "0" ]; then
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-CONTROL="6.1.1.1 Permissoes do arquivo do sistema de auditoria"
+CONTROL="6.1.1.2 Permissoes do arquivo do sistema de auditoria RHEL7 |CentOS 7"
+rpm -V bash-4.1.2-29.el7.x86_64
+if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="6.1.1.3 Permissoes do arquivo do sistema de auditoria"
 rpm -V `rpm -qf /etc/passwd`
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
@@ -1873,7 +1881,7 @@ if [ "$?" == "0" ]; then
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-CONTROL="6.1.1.2 Permissoes do arquivo do sistema de auditoria"
+CONTROL="6.1.1.4 Permissoes do arquivo do sistema de auditoria"
 rpm -Va --nomtime --nosize --nomd5 --nolinkto > /root/Auditoria/Auditoria-$CONTROL.csv
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
