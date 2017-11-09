@@ -362,3 +362,61 @@ echo "6.2	    User and Group Settings"
 #6.2.17	Ensure no duplicate GIDs exist (Scored)
 #6.2.18	Ensure no duplicate user names exist (Scored)
 #6.2.19	Ensure no duplicate group names exist (Scored)
+
+
+Este arquivo contém um script de shell para configurar o Red Hat Enterprise Linux 7 em conformidade com o benchmark CIS Red Hat Enterprise Linux 7 v2.1.0. Ele foi testado contra o Red Hat Enterprise Linux 7.2 conforme avaliado pelo CIS-CAT v3.0.26.
+
+Para executar o script, passe um único parâmetro para o perfil desejado:
+
+# sh CIS_Red_Hat_Enterprise_Linux_7_Benchmark_v2.1.0.sh "Nível 1 - Servidor"
+# sh CIS_Red_Hat_Enterprise_Linux_7_Benchmark_v2.1.0.sh "Nível 2 - Servidor"
+# sh CIS_Red_Hat_Enterprise_Linux_7_Benchmark_v2.1.0.sh "Nível 1 - Estação de trabalho"
+# sh CIS_Red_Hat_Enterprise_Linux_7_Benchmark_v2.1.0.sh "Nível 2 - Estação de trabalho"
+#Se nenhum parâmetro for passado, o script será padrão para "Nível 1 - Servidor".
+
+Além dos itens avaliados não cis-cat, os seguintes não são configurados por este script:
+Esses parâmetros de controle devem ser analisados e cofigurados manualmente
+
+1.1.2 - 1.1.17 O particionamento do sistema deve ser concluído manualmente.
+
+1.4.2 Certifique-se de \ bootloader \ password \ is \ set | As senhas devem ser configuradas manualmente.
+
+1.5.2 Certifique-se de que \ XD / NX \ support \ is \ enabled |O suporte XD / NX é baseado no kernel.
+
+1.6.1.1 - 1.6.1.3 A modificação das configurações do SELinux pode impedir a inicialização do sistema, deve ser concluída manualmente.
+
+1.6.1.6 A investigação e a remediação devem ser concluídas manualmente
+
+1.7.2 Certifique-se de que \ GDM \ login \ banner \ is \ configurado | A configuração GDM deve ser configurada manualmente para evitar a má configuração.
+
+2.2.15 Certifique-se de que \ mail \ transfer \ agent \ is \ configurado \ for \ local-only \ mode | A remediação depende do MTA em uso.
+
+3.3.3 Verifique se o IPv6 está desativado |Só deve ser desabilitado se não for destinado ao seu ambiente
+
+3.4.3 Verifique se \ /etc/hosts.deny \ is \ configurado | A configuração automatizada pode bloquear a administração.
+
+3.6.2 - 3.6.5 A configuração automatizada pode bloquear a administração. 
+
+4.2.1.2 - 4.2.1.5 A configuração do servidor de log deve ser configurada manualmente para evitar a má configuração.
+
+4.2.2.2 - 4.2.2.5 A configuração do servidor de log deve ser configurada manualmente para evitar a má configuração.
+
+5.2.15 Certifique-se de que \ SSH \ access \ is \ limited |A configuração automatizada pode bloquear a administração.
+
+5.3.2 A configuração pam_faillock.so deve ser configurada manualmente para evitar má configuração.
+
+6.1.10 - 6.1.12 As permissões / existência de arquivos / pastas devem ser atualizadas manualmente.
+
+6.2.1 Certifique-se de \ senha \ fields \ are \ not \ empty |As senhas devem ser configuradas manualmente.
+
+6.2.5A conta UID 0 adequada pode ter sido removida, deve ser completada manualmente.
+
+6.2.6 root PATH deve ser definido pelo usuário final.
+
+6.2.7 - 6.2.14 As permissões de arquivo / pasta de usuário / existência devem ser atualizadas manualmente.
+
+6.2.15 Certifique-se de \ all \ groups \ in \ / etc / passwd \ existing \ in \ / etc / group |A modificação da conta ou criação de grupo deve ser completada manualmente.
+
+6.2.16 - 6.2.17 Os IDs duplicados devem ser resolvidos pelo usuário final.
+
+6.2.18 - 6.2.19 Os nomes duplicados devem ser corrigidos pelo usuário final.
