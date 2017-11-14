@@ -9,7 +9,7 @@
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 # ID              Date   version
-# Roberto.Lima 2017.10.18 0.1  
+# Roberto.Lima 2017.11.13 0.6  
 #------------------------------------------------------------------------------
 ###############################################################################
 #set -x       #Descommentar essa linha para ver em modo debug o script
@@ -261,7 +261,7 @@ fi
 ##################################################################################
 CONTROL="1.1.22 Desativar a montagem automatica"
 service autofs status
-if [ "$?" == "0" ]; then
+if [ "$?" == "1" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -624,9 +624,17 @@ CONTROL="2.2.17 Certifique-se de que o NIS Server nao esta habilitado"
 echo "$CONTROL,exception">> $LOG
 ##################################################################################
 echo "2.3 Clientes de servico"
-CONTROL="2.3.1 Garantir que o NIS Client nao esteja instalado"
-rpm -q ypbind
+CONTROL="2.3.1 Garantir que o NTP Monlist esteja desabilitado"
+cat /etc/ntp.conf | grep "disable monitor"
 if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="2.3.1.1 Garantir que o NIS Client nao esteja instalado"
+rpm -q ypbind
+if [ "$?" == "1" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -717,7 +725,7 @@ fi
 ##################################################################################
 CONTROL="3.2.3 Certifique-se de que os redirecionamentos ICMP seguros nao sao aceitos"
 sysctl net.ipv4.conf.all.secure_redirects
-if [ "$?" == "1" ]; then
+if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -725,7 +733,7 @@ fi
 ##################################################################################
 CONTROL="3.2.3.1 Certifique-se de que os redirecionamentos ICMP seguros nao sao aceitos"
 sysctl net.ipv4.conf.default.secure_redirects
-if [ "$?" == "1" ]; then
+if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -733,7 +741,7 @@ fi
 ##################################################################################
 CONTROL="3.2.4 Certifique-se de que os pacotes suspeitos estejam registrados"
 sysctl net.ipv4.conf.all.log_martians
-if [ "$?" == "1" ]; then
+if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -741,7 +749,7 @@ fi
 ##################################################################################
 CONTROL="3.2.4.1 Certifique-se de que os pacotes suspeitos estejam registrados"
 sysctl net.ipv4.conf.default.log_martians
-if [ "$?" == "1" ]; then
+if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -790,7 +798,7 @@ fi
 echo "3.3 IPv6"
 CONTROL="3.3.1 Certifique-se de que as propagandas do roteador IPv6 nao sao aceitas "
 sysctl net.ipv6.conf.all.accept_ra
-if [ "$?" == "1" ]; then
+if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -798,7 +806,7 @@ fi
 ##################################################################################
 CONTROL="3.3.1.1 Certifique-se de que as propagandas do roteador IPv6 nao sao aceitas "
 sysctl net.ipv6.conf.default.accept_ra
-if [ "$?" == "1" ]; then
+if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -847,7 +855,7 @@ fi
 ##################################################################################
 CONTROL="3.4.2 Garanta que /etc/hosts.allow esteja configurado"
 cat /etc/hosts.allow
-if [ "$?" == "1" ]; then
+if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -855,7 +863,7 @@ fi
 ##################################################################################
 CONTROL="3.4.3 Certifique-se de /etc/hosts.deny esta configurado"
 cat /etc/hosts.deny
-if [ "$?" == "1" ]; then
+if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -904,6 +912,14 @@ fi
 CONTROL="3.5.4 Certifique-se de que TIPC esteja desativado"
 modprobe -n -v tipc
 if [ "$?" == "0" ]; then
+  echo "$CONTROL,pass">> $LOG
+  else
+  echo "$CONTROL,fail">> $LOG
+fi
+##################################################################################
+CONTROL="3.5.4.1 Certifique-se de que TLSv1 esteja desativado"
+openssl s_client -connect ip:port -tls1
+if [ "$?" == "1" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
@@ -1977,7 +1993,7 @@ if [ "$?" == "0" ]; then
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-CONTROL="6.1.13 Auditoria SUID executaveis ​​"
+CONTROL="6.1.13 Auditoria SUID executaveis​​"
 df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -4000
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
@@ -1985,7 +2001,7 @@ if [ "$?" == "0" ]; then
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-CONTROL="6.1.14 Auditoria SGID executaveis ​​"
+CONTROL="6.1.14 Auditoria SGID executaveis​​"
 df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -2000
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
@@ -2037,214 +2053,228 @@ fi
 #executarscrit controle 6.2.6
 CONTROL="6.2.6 Certifique-se de integridade da PATH raiz "
 #!/bin/bash 
-for dir in `cat /etc/passwd | egrep -v '(root|halt|sync|shutdown)' | awk -F: '($7 != "/usr/sbin/nologin") { print $6 }'`; do
-  dirperm=`ls -ld $dir | cut -f1 -d" "` 
-  if [ `echo $dirperm | cut -c6 ` != "-" ]; then
-    echo "Group Write permission set on directory $dir" 
-  fi 
-  if [ `echo $dirperm | cut -c8 ` != "-" ]; then 
-    echo "Other Read permission set on directory $dir" 
-  fi 
-  if [ `echo $dirperm | cut -c9 ` != "-" ]; then
-    echo "Other Write permission set on directory $dir" 
-  fi
-  if [ `echo $dirperm | cut -c10 ` != "-" ]; then
-    echo "Other Execute permission set on directory $dir" 
-  fi 
-done
-  if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
+#for dir in `cat /etc/passwd | egrep -v '(root|halt|sync|shutdown)' | awk -F: '($7 != "/usr/sbin/nologin") { print $6 }'`; do
+#  dirperm=`ls -ld $dir | cut -f1 -d" "` 
+#  if [ `echo $dirperm | cut -c6 ` != "-" ]; then
+#    echo "Group Write permission set on directory $dir" 
+#  fi 
+#  if [ `echo $dirperm | cut -c8 ` != "-" ]; then 
+#    echo "Other Read permission set on directory $dir" #
+#  fi 
+#  if [ `echo $dirperm | cut -c9 ` != "-" ]; then
+#    echo "Other Write permission set on directory $dir" 
+#  fi
+#  if [ `echo $dirperm | cut -c10 ` != "-" ]; then
+#    echo "Other Execute permission set on directory $dir" 
+#  fi 
+#done
+#  if [ "$?" == "0" ]; then
+#  echo "$CONTROL,pass">> $LOG
+#  else
+#  echo "$CONTROL,fail">> $LOG
+#fi
+echo "$CONTROL,exception">> $LOG
 ##################################################################################
 CONTROL="6.2.7 Certifique-se de que todos os diretorios domesticos de todos os usuarios existam"
 #!/bin/bash
-cat /etc/passwd | awk -F: '{ print $1 " " $3 " " $6 }' | while read user uid dir; do
-  if [ $uid -ge 1000 -a ! -d "$dir" -a $user != "nfsnobody" ]; then
-    echo "The home directory ($dir) of user $user does not exist." 
-  fi 
-done
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
+#cat /etc/passwd | awk -F: '{ print $1 " " $3 " " $6 }' | while read user uid dir; do
+#  if [ $uid -ge 1000 -a ! -d "$dir" -a $user != "nfsnobody" ]; then
+#    echo "The home directory ($dir) of user $user does not exist." 
+#  fi 
+#done
+#if [ "$?" == "0" ]; then
+#  echo "$CONTROL,pass">> $LOG
+#  else
+#  echo "$CONTROL,fail">> $LOG
+#fi
+echo "$CONTROL,exception">> $LOG
 ##################################################################################
 CONTROL="6.2.8 Assegure-se de que as permissoes dos diretorios domesticos dos usuarios sejam 750 ou mais restritivas"
 #!/bin/bash 
-for dir in `cat /etc/passwd | egrep -v '(root|halt|sync|shutdown)' | awk -F: '($7 != "/usr/sbin/nologin") { print $6 }'`; do
-  dirperm=`ls -ld $dir | cut -f1 -d" "` 
-  if [ `echo $dirperm | cut -c6 ` != "-" ]; then
-    echo "Group Write permission set on directory $dir" 
-  fi 
-  if [ `echo $dirperm | cut -c8 ` != "-" ]; then 
-    echo "Other Read permission set on directory $dir" 
-  fi 
-  if [ `echo $dirperm | cut -c9 ` != "-" ]; then
-    echo "Other Write permission set on directory $dir" 
-  fi
-  if [ `echo $dirperm | cut -c10 ` != "-" ]; then
-    echo "Other Execute permission set on directory $dir" 
-  fi 
-done
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
+#for dir in `cat /etc/passwd | egrep -v '(root|halt|sync|shutdown)' | awk -F: '($7 != "/usr/sbin/nologin") { print $6 }'`; do
+#  dirperm=`ls -ld $dir | cut -f1 -d" "` 
+#  if [ `echo $dirperm | cut -c6 ` != "-" ]; then
+#    echo "Group Write permission set on directory $dir" 
+#  fi 
+#  if [ `echo $dirperm | cut -c8 ` != "-" ]; then 
+#    echo "Other Read permission set on directory $dir" 
+#  fi 
+#  if [ `echo $dirperm | cut -c9 ` != "-" ]; then
+#    echo "Other Write permission set on directory $dir" 
+#  fi
+#  if [ `echo $dirperm | cut -c10 ` != "-" ]; then
+#    echo "Other Execute permission set on directory $dir" 
+#  fi 
+#done
+#if [ "$?" == "0" ]; then
+#  echo "$CONTROL,pass">> $LOG
+#  else
+#  echo "$CONTROL,fail">> $LOG
+#fi
+echo "$CONTROL,exception">> $LOG
 ##################################################################################
 CONTROL="6.2.9 Certifique-se de que os usuarios possuem seus diretorios domesticos"
 #!/bin/bash 
-cat /etc/passwd | awk -F: '{ print $1 " " $3 " " $6 }' | while read user uid dir; do
-  if [ $uid -ge 1000 -a -d "$dir" -a $user != "nfsnobody" ]; then
-  owner=$(stat -L -c "%U" "$dir") 
-    if [ "$owner" != "$user" ]; then
-    echo "The home directory ($dir) of user $user is owned by $owner." 
-    fi 
-  fi 
-done
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
+#cat /etc/passwd | awk -F: '{ print $1 " " $3 " " $6 }' | while read user uid dir; do
+#  if [ $uid -ge 1000 -a -d "$dir" -a $user != "nfsnobody" ]; then
+#  owner=$(stat -L -c "%U" "$dir") 
+#    if [ "$owner" != "$user" ]; then
+#    echo "The home directory ($dir) of user $user is owned by $owner." 
+#    fi 
+#  fi 
+#done
+#if [ "$?" == "0" ]; then
+#  echo "$CONTROL,pass">> $LOG
+#  else
+#  echo "$CONTROL,fail">> $LOG
+#fi
+echo "$CONTROL,exception">> $LOG
 ##################################################################################
 CONTROL="6.2.10 Assegure-se de que os arquivos de ponto dos usuarios nao sejam gravados em grupo ou gravados no mundo"
 #!/bin/bash
-for dir in `cat /etc/passwd | egrep -v '(root|sync|halt|shutdown)' | awk -F: '($7 != "/usr/sbin/nologin") { print $6 }'`; do
-  for file in $dir/.[A-Za-z0-9]*; do
-    if [ ! -h "$file" -a -f "$file" ]; then
-      fileperm=`ls -ld $file | cut -f1 -d" "` 
-      if [ `echo $fileperm | cut -c6 ` != "-" ]; then
-       echo "Group Write permission set on file $file" 
-      fi 
-      if [ `echo $fileperm | cut -c9 ` != "-" ]; then
-       echo "Other Write permission set on file $file" 
-      fi 
-    fi 
-  done 
-done
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
+#for dir in `cat /etc/passwd | egrep -v '(root|sync|halt|shutdown)' | awk -F: '($7 != "/usr/sbin/nologin") { print $6 }'`; do
+#  for file in $dir/.[A-Za-z0-9]*; do
+#    if [ ! -h "$file" -a -f "$file" ]; then
+#      fileperm=`ls -ld $file | cut -f1 -d" "` 
+#      if [ `echo $fileperm | cut -c6 ` != "-" ]; then
+#       echo "Group Write permission set on file $file" 
+#      fi 
+#      if [ `echo $fileperm | cut -c9 ` != "-" ]; then
+#       echo "Other Write permission set on file $file" 
+#      fi 
+#    fi 
+#  done 
+#done
+#if [ "$?" == "0" ]; then
+#  echo "$CONTROL,pass">> $LOG
+#  else
+#  echo "$CONTROL,fail">> $LOG
+#fi
+echo "$CONTROL,exception">> $LOG
 ##################################################################################
 CONTROL="6.2.11 Certifique-se de que nenhum usuario tenha arquivos .forward"
 #!/bin/bash 
-for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
-  if [ ! -h "$dir/.forward" -a -f "$dir/.forward" ]; then
-    echo ".forward file $dir/.forward exists" 
-  fi 
-done
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
+#for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
+#  if [ ! -h "$dir/.forward" -a -f "$dir/.forward" ]; then
+#    echo ".forward file $dir/.forward exists" 
+#  fi 
+#done
+#if [ "$?" == "0" ]; then
+#  echo "$CONTROL,pass">> $LOG
+#  else
+#  echo "$CONTROL,fail">> $LOG
+#fi
+echo "$CONTROL,exception">> $LOG
 ##################################################################################
 CONTROL="6.2.12 Certifique-se de que nenhum usuario tenha arquivos .netrc"
 #!/bin/bash 
-for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
-  if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then
-    echo ".netrc file $dir/.netrc exists" 
-  fi 
-done
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
+#for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
+#  if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then
+#    echo ".netrc file $dir/.netrc exists" 
+#  fi 
+#done
+#if [ "$?" == "0" ]; then
+#  echo "$CONTROL,pass">> $LOG
+#  else
+#  echo "$CONTROL,fail">> $LOG
+#fi
+echo "$CONTROL,exception">> $LOG
 ##################################################################################
 CONTROL="6.2.13 Certifique-se de que os arquivos .netrc dos usuarios nao sejam acessiveis ao grupo ou ao mundo"
 #!/bin/bash 
-for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
-  if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then
-    echo ".netrc file $dir/.netrc exists" 
-  fi 
-done
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
+#for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
+#  if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then
+#    echo ".netrc file $dir/.netrc exists" 
+#  fi 
+#done
+#if [ "$?" == "0" ]; then
+#  echo "$CONTROL,pass">> $LOG#
+#  else
+#  echo "$CONTROL,fail">> $LOG
+#fi
+echo "$CONTROL,exception">> $LOG
 ##################################################################################
 CONTROL="6.2.14 Certifique-se de que nenhum usuario tenha arquivos .rhosts"
 #!/bin/bash 
-for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
-  if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then
-    echo ".netrc file $dir/.netrc exists" 
-  fi 
-done
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
+#for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
+#  if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then
+#    echo ".netrc file $dir/.netrc exists" 
+#  fi 
+#done
+#if [ "$?" == "0" ]; then
+#  echo "$CONTROL,pass">> $LOG
+#  else
+#  echo "$CONTROL,fail">> $LOG
+#fi
+echo "$CONTROL,exception">> $LOG
 ##################################################################################
 CONTROL="6.2.15 Certifique-se de que todos os grupos em / etc / passwd existem em / etc / group"
 #!/bin/bash 
-for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
-  if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then
-    echo ".netrc file $dir/.netrc exists" 
-  fi 
-done
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
+#for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
+#  if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then
+#    echo ".netrc file $dir/.netrc exists" 
+#  fi 
+#done
+#if [ "$?" == "0" ]; then
+#  echo "$CONTROL,pass">> $LOG
+#  else
+#  echo "$CONTROL,fail">> $LOG
+#fi
+echo "$CONTROL,exception">> $LOG
 ##################################################################################
 CONTROL="6.2.16 Certifique-se de que nao existem UID duplicados"
 #!/bin/bash 
-for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
-  if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then
-    echo ".netrc file $dir/.netrc exists" 
-  fi 
-done
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
+#for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
+#  if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then
+#    echo ".netrc file $dir/.netrc exists" 
+#  fi 
+#done
+#if [ "$?" == "0" ]; then
+#  echo "$CONTROL,pass">> $LOG
+#  else
+#  echo "$CONTROL,fail">> $LOG
+#fi
+echo "$CONTROL,exception">> $LOG
 ##################################################################################
 CONTROL="6.2.17 Certifique-se de que nao existam GID duplicados"
 #!/bin/bash 
-for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
-  if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then
-    echo ".netrc file $dir/.netrc exists" 
-  fi 
-done
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
+#for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
+#  if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then
+#    echo ".netrc file $dir/.netrc exists" 
+#  fi
+#done
+#if [ "$?" == "0" ]; then
+#  echo "$CONTROL,pass">> $LOG
+#  else
+#  echo "$CONTROL,fail">> $LOG
+#fi
+echo "$CONTROL,exception">> $LOG
 ##################################################################################
 CONTROL="6.2.18 Certifique-se de que nao existam nomes de usuarios duplicados"
 #!/bin/bash 
-for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
-  if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then
-    echo ".netrc file $dir/.netrc exists" 
-  fi 
-done
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
+#for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
+#  if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then
+#    echo ".netrc file $dir/.netrc exists" 
+#  fi 
+#done
+#if [ "$?" == "0" ]; then
+#  echo "$CONTROL,pass">> $LOG
+#  else
+#  echo "$CONTROL,fail">> $LOG
+#fi
+echo "$CONTROL,exception">> $LOG
 ##################################################################################
 CONTROL="6.2.19 Certifique-se de que nao existam nomes de grupos duplicados"
 #!/bin/bash 
-for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
-  if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then
-    echo ".netrc file $dir/.netrc exists" 
-  fi 
-done
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
+#for dir in `cat /etc/passwd |\ awk -F: '{ print $6 }'`; do
+#  if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then
+#    echo ".netrc file $dir/.netrc exists" 
+#  fi 
+#done
+#if [ "$?" == "0" ]; then
+#  echo "$CONTROL,pass">> $LOG
+#  else
+#  echo "$CONTROL,fail">> $LOG
+#fi
+echo "$CONTROL,exception">> $LOG
 #===============================Audiotiria do Sistema Finalizada==================

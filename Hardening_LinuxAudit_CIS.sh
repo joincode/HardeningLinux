@@ -40,7 +40,7 @@ echo "<!DOCTYPE html><html lang="pt-br"><head><title>Benchmark Hardening CIS-2.1
 #echo "1 Configuracao inicial">> $LOG
 #echo "1.1 Configuracao do Sistema de Arquivos">> $LOG
 #echo "1.1.1 Desativar sistemas de arquivos nao utilizados">> $LOG
-
+echo ""
 CONTROL="1.1.1.1 Certifique-se de que a montagem de arquivos do cramfs esteja desabilitada"
 modprobe -n -v cramfs
 if [ "$?" == "0" ]; then
