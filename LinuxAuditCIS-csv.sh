@@ -261,10 +261,10 @@ fi
 ##################################################################################
 CONTROL="1.1.22 Desativar a montagem automatica"
 service autofs status
-if [ "$?" == "1" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
+if [ "$?" == "0" ]; then
   echo "$CONTROL,fail">> $LOG
+  else
+  echo "$CONTROL,pass">> $LOG
 fi
 ##################################################################################
 echo "1.2 Configurar atualizacoes de software"
@@ -568,9 +568,9 @@ fi
 CONTROL="2.2.1.2.2 Certifique-se de que as OPcoes ntp esteja configurado"
 grep "^OPTIONS" /etc/sysconfig/ntpd
 if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
   echo "$CONTROL,fail">> $LOG
+  else
+  echo "$CONTROL,pass">> $LOG
 fi
 ##################################################################################
 CONTROL="2.2.1.3 Certifique-se de que o chrony esteja configurado"
@@ -1058,7 +1058,7 @@ if [ "$?" == "0" ]; then
 fi
 ##################################################################################
 CONTROL="4.1.2 Certifique-se de que o servico de auditoria esteja ativado"
-service audit status
+service auditd status
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
@@ -1081,15 +1081,6 @@ if [ "$?" == "0" ]; then
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-CONTROL="4.1.4.1 Certifique-se de que os eventos que modificam as informacoes de data e hora sao coletados"
-grep time-change /etc/audit/audit.rules
-if [ "$?" == "0" ]; then
-  echo "$CONTROL,pass">> $LOG
-  else
-  echo "$CONTROL,fail">> $LOG
-fi
-##################################################################################
-
 CONTROL="4.1.5 Certifique-se de que os eventos que modificam as informacoes do usuario / grupo sao coletados"
 grep identity /etc/audit/audit.rules
 if [ "$?" == "0" ]; then
@@ -1178,7 +1169,6 @@ if [ "$?" == "0" ]; then
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-
 CONTROL="4.1.14 Certifique-se de que os eventos de exclusao de arquivos pelos usuarios sejam coletados"
 grep delete /etc/audit/audit.rules
 if [ "$?" == "0" ]; then
@@ -1195,7 +1185,6 @@ if [ "$?" == "0" ]; then
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-
 CONTROL="4.1.15 Assegure-se de que as mudancas no escopo de administracao do sistema (sudoers) sejam coletadas"
 grep scope /etc/audit/audit.rules
 if [ "$?" == "0" ]; then
