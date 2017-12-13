@@ -1,0 +1,288 @@
+Cisco CIS - CONTROL IOS15
+
+1 Management Plane 
+1.1 Local Authentication, Authorization and Accounting (AAA) Rules
+1.1.1 Enable 'aaa new-model' (Scored) 
+
+1.1.1. Enable aaa new-model
+hostname#show running-config | incl aaa new-model
+
+1.1.2 Enable 'aaa authentication login' (Scored) 
+hostname#show run | incl aaa authentication login
+
+1.1.3 Enable 'aaa authentication enable default' (Scored) 
+hostname#show running-config | incl aaa authentication enable
+
+1.1.4 Set 'login authentication for 'line con 0' (Scored) 
+hostname#sh run | sec line | incl login authentication
+
+1.1.5 Set 'login authentication for 'line tty' (Scored) 
+hostname#sh run | sec line | incl login authentication
+
+1.1.6 Set 'login authentication for 'line vty' (Scored) ............................................................ 21
+hostname#sh run | sec line | incl login authentication
+
+1.1.7 Set 'aaa accounting' to log all privileged use commands using 'commands 15' (Scored) ................................................................................................................................................... 23
+hostname#sh run | incl aaa accounting connection
+
+1.1.8 Set 'aaa accounting connection' (Scored) ........................................................................ 24
+hostname#sh run | incl aaa accounting connection
+
+1.1.9 Set 'aaa accounting exec' (Scored) ..................................................................................... 26
+hostname#sh run | incl aaa accounting exec
+
+1.1.10 Set 'aaa accounting network' (Scored) .......................................................................... 28
+hostname#sh run | incl aaa accounting network
+
+1.1.11 Set 'aaa accounting system' (Scored) ............................................................................. 30
+hostname#sh run | incl aaa accounting system
+
+1.2 Access Rules ........................................................................................................................................ 31
+1.2.1 Set 'privilege 1' for local users (Scored) .......................................................................... 32
+hostname#show run | incl privilege
+
+1.2.2 Set 'transport input ssh' for 'line vty' connections (Scored) .................................... 33
+hostname#sh run | sec vty
+
+1.2.3 Set 'no exec' for 'line aux 0' (Scored) ................................................................................ 34
+hostname#sh run | sec aux
+
+1.2.4 Create 'access-list' for use with 'line vty' (Not Scored) .............................................. 36
+hostname#sh ip access-list <vty_acl_number>
+
+1.2.5 Set 'access-class' for 'line vty' (Scored) ............................................................................ 38
+hostname#sh run | sec vty <line-number> <ending-line-number>
+
+1.2.6 Set 'exec-timeout' to less than or equal to 10 minutes for 'line aux 0' (Scored) ..................................................................................................................................................................... 39
+hostname#sh run | sec line aux 0
+
+1.2.7 Set 'exec-timeout' to less than or equal to 10 minutes 'line console 0' (Scored) ..................................................................................................................................................................... 41
+hostname#sh run | sec line con 0
+
+1.2.8 Set 'exec-timeout' less than or equal to 10 minutes 'line tty' (Scored) ............... 43
+hostname#sh line tty <tty_line_number> | begin Timeout
+
+1.2.9 Set 'exec-timeout' to less than or equal to 10 minutes 'line vty' (Scored) ......... 45
+hostname#sh line vty <tty_line_number> | begin Timeout
+
+1.2.10 Set 'transport input none' for 'line aux 0' (Scored)................................................... 47
+hostname#sh line aux 0 | incl input transports
+
+1.3 Banner Rules ....................................................................................................................................... 48
+1.3.1 Set the 'banner-text' for 'banner exec' (Scored) ........................................................... 49
+hostname#sh running-config | beg banner exec
+
+1.3.2 Set the 'banner-text' for 'banner login' (Scored) .......................................................... 51
+hostname#show running-config | beg banner login
+
+1.3.3 Set the 'banner-text' for 'banner motd' (Scored) ......................................................... 53
+hostname#sh running-config | beg banner motd
+
+1.4 Password Rules .................................................................................................................................. 55
+1.4.1 Set 'password' for 'enable secret' (Scored) .................................................................... 56
+hostname#sh run | incl enable secret
+
+1.4.2 Enable 'service password-encryption' (Scored) ........................................................... 58
+hostname#sh run | incl service password-encryption
+
+1.4.3 Set 'username secret' for all local users (Scored) ........................................................ 60
+hostname#show run | incl username
+
+1.5 SNMP Rules .......................................................................................................................................... 62
+hostname#show snmp community
+
+1.5.1 Set 'no snmp-server' to disable SNMP when unused (Scored) ............................... 63
+hostname#show snmp community
+
+1.5.2 Unset 'private' for 'snmp-server community' (Scored) ............................................. 64
+hostname# show snmp community
+
+1.5.3 Unset 'public' for 'snmp-server community' (Scored) ............................................... 65
+hostname# show snmp community
+
+1.5.4 Do not set 'RW' for any 'snmp-server community' (Scored) ................................... 66
+hostname#show run | incl snmp-server community
+
+1.5.5 Set the ACL for each 'snmp-server community' (Scored) ......................................... 67
+hostname#show run | incl snmp-server community
+
+1.5.6 Create an 'access-list' for use with SNMP (Scored) ..................................................... 69
+hostname#sh ip access-list <snmp_acl_number>
+
+1.5.7 Set 'snmp-server host' when using SNMP (Scored) .................................................... 70
+hostname#show run snmp-server
+
+1.5.8 Set 'snmp-server enable traps snmp' (Scored) ............................................................. 71
+hostname#show run snmp-server
+
+1.5.9 Set 'priv' for each 'snmp-server group' using SNMPv3 (Scored) ........................... 72
+hostname#show snmp groups
+
+1.5.10 Require 'aes 128' as minimum for 'snmp-server user' when using SNMPv3 (Scored) ................................................................................................................................................... 73
+hostname#show snmp user
+
+2 Control Plane ............................................................................................................................................... 74
+2.1 Global Service Rules ......................................................................................................................... 74
+2.1.1.1.1 Set the 'hostname' (Scored) ........................................................................................... 75
+hostname#sh run | incl hostname
+
+2.1.1.1.2 Set the 'ip domain name' (Scored) .............................................................................. 76
+hostname#sh run | incl domain name
+
+2.1.1.1.3 Set 'modulus' to greater than or equal to 2048 for 'crypto key generate rsa' (Not Scored) ........................................................................................................................................... 77
+hostname#sh crypto key mypubkey rsa
+
+2.1.1.1.4 Set 'seconds' for 'ip ssh timeout' (Scored) ............................................................... 78
+hostname#sh ip ssh
+
+2.1.1.1.5 Set maximum value for 'ip ssh authentication-retries' (Scored) .................... 79
+hostname#sh ip ssh
+
+2.1.1.2 Set version 2 for 'ip ssh version' (Scored) ................................................................... 80
+hostname#sh ip ssh
+
+2.1.2 Set 'no cdp run' (Scored) ........................................................................................................ 82
+hostname#show cdp
+
+2.1.3 Set 'no ip bootp server' (Scored) ........................................................................................ 83
+hostname#show run | incl bootp
+
+2.1.4 Set 'no service dhcp' (Scored) .............................................................................................. 84
+hostname#show run | incl dhcp
+
+2.1.5 Set 'no ip identd' (Scored) ..................................................................................................... 86
+hostname#show run | incl identd
+
+2.1.6 Set 'service tcp-keepalives-in' (Scored) ........................................................................... 87
+hostname#show run | incl identd
+
+2.1.7 Set 'service tcp-keepalives-out' (Scored) ........................................................................ 89
+hostname#show run | incl service tcp
+
+2.1.8 Set 'no service pad' (Scored) ................................................................................................ 91
+hostname#show run | incl service pad
+
+2.2 Logging Rules ...................................................................................................................................... 92
+2.2.1 Set 'logging on' (Scored) ........................................................................................................ 93
+hostname#show run | incl logging on
+
+2.2.2 Set 'buffer size' for 'logging buffered' (Scored) ............................................................. 94
+hostname#show run | incl logging buffered
+
+2.2.3 Set 'logging console critical' (Scored) ............................................................................... 95
+hostname#show run | incl logging console
+
+2.2.4 Set IP address for 'logging host' (Scored) ....................................................................... 96
+hostname#sh log | incl logging host
+
+2.2.5 Set 'logging trap informational' (Scored) ........................................................................ 98
+hostname#sh log | incl trap logging
+
+2.2.6 Set 'service timestamps debug datetime' (Scored) ..................................................... 99
+hostname#sh run | incl service timestamps
+
+2.2.7 Set 'logging source interface' (Scored) ........................................................................... 101
+hostname#sh run | incl logging source
+
+2.3 NTP Rules ........................................................................................................................................... 102
+2.3.1 Require Encryption Keys for NTP
+2.3.1.1 Set 'ntp authenticate' (Scored) ...................................................................................... 103
+hostname#show run | include ntp
+
+2.3.1.2 Set 'ntp authentication-key' (Scored) ......................................................................... 104
+hostname#show run | include ntp authentication-key
+
+2.3.1.3 Set the 'ntp trusted-key' (Scored) ................................................................................. 105
+hostname#show run | include ntp trusted-key
+
+2.3.1.4 Set 'key' for each 'ntp server' (Scored) ....................................................................... 106
+hostname#show run | include ntp server
+
+2.3.2 Set 'ip address' for 'ntp server' (Scored) ....................................................................... 107
+hostname#sh ntp associations
+
+2.4 Loopback Rules ................................................................................................................................ 108
+2.4.1 Create a single 'interface loopback' (Scored)............................................................... 109
+hostname#sh ip int brief | incl Loopback
+
+2.4.2 Set AAA 'source-interface' (Scored) ................................................................................ 111
+hostname#sh run | incl tacacs source | radius source
+
+2.4.3 Set 'ntp source' to Loopback Interface (Scored) ......................................................... 112
+hostname#sh run | incl ntp source
+
+2.4.4 Set 'ip tftp source-interface' to the Loopback Interface (Scored) ........................ 113
+hostname#sh run | incl tftp source-interface
+
+3 Data Plane ................................................................................................................................................... 114
+3.1 Routing Rules .................................................................................................................................... 114
+3.1.1 Set 'no ip source-route' (Scored) ...................................................................................... 115
+hostname#sh run | incl ip source-route
+
+3.1.2 Set 'no ip proxy-arp' (Scored) ............................................................................................ 116
+hostname#sh ip int {interface} | incl proxy-arp
+
+3.1.3 Set 'no interface tunnel' (Scored) ..................................................................................... 118
+hostname#sh ip int brief | incl tunnel
+
+3.1.4 Set 'ip verify unicast source reachable-via' (Scored) ................................................ 119
+hostname#sh ip int {interface} | incl verify source
+
+3.2 Border Router Filtering ................................................................................................................ 120
+3.2.1 Set 'ip access-list extended' to Forbid Private Source Addresses from External Networks (Not Scored) .................................................................................................................... 121
+hostname#sh ip access-list {name | number}
+
+3.2.2 Set inbound 'ip access-group' on the External Interface (Not Scored) .............. 123
+hostname#sh run | sec interface {external_interface}
+
+3.3 Neighbor Authentication .............................................................................................................. 124
+3.3.1.1 Set 'key chain' (Scored) ..................................................................................................... 125
+hostname#sh run | sec key chain
+
+3.3.1.2 Set 'key' (Scored) ................................................................................................................. 126
+hostname#sh run | sec key chain
+
+3.3.1.3 Set 'key-string' (Scored) ................................................................................................... 127
+hostname#sh run | sec key chain
+
+3.3.1.4 Set 'address-family ipv4 autonomous-system' (Scored) ..................................... 128
+hostname#sh run | sec router eigrp
+
+3.3.1.5 Set 'af-interface default' (Scored) ................................................................................. 129
+hostname#sh run | sec router eigrp
+
+3.3.1.6 Set 'authentication key-chain' (Scored) ..................................................................... 130
+hostname#sh run | sec router eigrp
+
+3.3.1.7 Set 'authentication mode md5' (Scored) ................................................................... 132
+hostname#sh run | sec router eigrp
+
+3.3.1.8 Set 'ip authentication key-chain eigrp' (Scored) ..................................................... 134
+hostname#sh run int {interface_name} | incl key-chain
+
+3.3.1.9 Set 'ip authentication mode eigrp' (Scored) ............................................................. 135
+hostname#sh run int {interface_name} | incl authentication mode
+
+3.3.2.1 Set 'authentication message-digest' for OSPF area (Scored) ............................. 137
+hostname#sh run | sec router ospf
+
+3.3.2.2 Set 'ip ospf message-digest-key md5' (Scored) ....................................................... 138
+hostname#sh run int {interface}
+
+3.3.3.1 Set 'key chain' (Scored) ..................................................................................................... 140
+hostname#sh run | sec key chain
+
+3.3.3.2 Set 'key' (Scored) ................................................................................................................. 141
+hostname#sh run | sec key chain
+
+3.3.3.3 Set 'key-string' (Scored) ................................................................................................... 142
+hostname#sh run | sec key chain
+
+3.3.3.4 Set 'ip rip authentication key-chain' (Scored) ......................................................... 143
+hostname#sh run int {interface_name}
+
+3.3.3.5 Set 'ip rip authentication mode' to 'md5' (Scored) ................................................ 144
+hostname#sh run int <interface>
+
+3.3.4.1 Set 'neighbor password' (Scored) ................................................................................. 146
+hostname#sh run | sec router bgp

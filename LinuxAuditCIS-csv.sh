@@ -845,7 +845,7 @@ if [ "$?" == "0" ]; then
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
-CONTROL="3.4.1 Certifique-se de que o TCP Wrappers esteja instalado"
+CONTROL="3.4.1.1 Certifique-se de que o TCP Wrappers esteja instalado"
 rpm -q tcp_wrappers-libs
 if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
@@ -871,14 +871,15 @@ fi
 ##################################################################################
 CONTROL="3.4.4 Certifique-se de que as permissoes em /etc/hosts.allow estao configuradas"
 stat /etc/hosts.allow
-if [ "$?" == "1" ]; then
+if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
 fi
 ##################################################################################
 CONTROL="3.4.5 Certifique-se de que as permissoes em /etc/hosts.deny sao 644"
-if [ "$?" == "1" ]; then
+stat /etc/hosts.deny
+if [ "$?" == "0" ]; then
   echo "$CONTROL,pass">> $LOG
   else
   echo "$CONTROL,fail">> $LOG
